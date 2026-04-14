@@ -1,0 +1,1063 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.7.0"
+    },
+    "colab": {
+      "provenance": [],
+      "toc_visible": true,
+      "include_colab_link": true
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/aleproy/MOOC-MachineLearningBigData/blob/main/Modulo%205.3\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "8vD-6nUjHFjP"
+      },
+      "source": [
+        "![cabecera_slide_abiertaugr_bigdata.jpg](https://i.imgur.com/HXn24wC.jpg)\n",
+        "## Módulo 5.3 Métodos avanzados en clasificación.\n",
+        "\n",
+        "**Autor**:\n",
+        "\n",
+        "*Por* Prof. Alberto Fernández Hilario\n",
+        "\n",
+        "Profesor Catedrático de Universidad de Granada. Instituto Andaluz Interuniversitario en Data Science and Computational Intelligence (DasCI)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "-8Y_zJaSHFjR"
+      },
+      "source": [
+        "## Breves Instrucciones\n",
+        "\n",
+        "### Recordatorio: Introducción a NoteBook\n",
+        "\n",
+        "El cuaderno de *Jupyter* (Python) es un enfoque que combina bloques de texto (como éste) junto con bloques o celdas de código. La gran ventaja de este tipo de celdas, es su interactividad, ya que pueden ser ejecutadas para comprobar los resultados directamente sobre las mismas.\n",
+        "\n",
+        "**Muy importante**: el orden de las instrucciones (bloques de código) es fundamental, por lo que cada celda de este cuaderno debe ser ejecutada secuencialmente. En caso de omitir alguna, puede que el programa lance un error (se mostrará un bloque salida con un mensaje en inglés de color rojo), así que se deberá comenzar desde el principio en caso de duda. Para hacer este paso más sencillo, se puede acceder al menú “Entorno de Ejecución” y pulsar sobre “Ejecutar anteriores”.\n",
+        "\n",
+        "¡Ánimo!\n",
+        "\n",
+        "Haga clic en el botón \"play\" en la parte izquierda de cada celda de código. Las líneas que comienzan con un hashtag (#) son comentarios y no afectan a la ejecución del programa.\n",
+        "\n",
+        "También puede pinchar sobre cada celda y hacer \"*ctrl+enter*\" (*cmd+enter* en Mac).\n",
+        "\n",
+        "Cuando se ejecute el primero de los bloques, aparecerá el siguiente mensaje:\n",
+        "\n",
+        "\"*Advertencia: Este cuaderno no lo ha creado Google.*\n",
+        "\n",
+        "*El creador de este cuaderno es \\<autor\\>@go.ugr.es. Puede que solicite acceso a tus datos almacenados en Google o que lea datos y credenciales de otras sesiones. Revisa el código fuente antes de ejecutar este cuaderno. Si tienes alguna pregunta, ponte en contacto con el creador de este cuaderno enviando un correo electrónico a \\<autor\\>@go.ugr.es.”*\n",
+        "\n",
+        "No se preocupe, deberá confiar en el contenido del cuaderno (Notebook) y pulsar en \"*Ejecutar de todos modos*\". Todo el código se ejecuta en un servidor de cálculo externo y no afectará en absoluto a su equipo informático. No se pedirá ningún tipo de información o credencial, y por tanto podrá seguir con el curso de forma segura.\n",
+        "\n",
+        "Cada vez que ejecute un bloque, verá la salida justo debajo del mismo. La información suele ser siempre la relativa a la última instrucción, junto con todos los `print()` (orden para imprimir) que haya en el código."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "5PYSesP3atPV"
+      },
+      "source": [
+        "## **ÍNDICE**\n",
+        "\n",
+        "En este *notebook*:\n",
+        "1. Se presentarán algoritmos de clasificación más sofisticados en aras de un mayor rendimiento predictivo.\n",
+        "2. Se describirán los modelos basados en Máquinas de Vectores Soporte, como una extensión de los modelos lineales.\n",
+        "3. Se comentarán detalles respecto a las soluciones basadas en redes neuronales y su extensión actual hacia el Deep Learning.\n",
+        "4. Se introducirán los algoritmos tipo \"ensemble\" (múltiples clasificadores) y en concreto se utilizará Random Forest como su mayor exponente.\n",
+        "5. Se analizarán las ventajas e inconvenientes de estos nuevos modelos.\n",
+        "6. Se mostrará cómo utilizar estos modelos avanzados mediante *Scikit-Learn* para Python.\n",
+        "7. Se discutirá sobre la influencia de los hiperparámetros en este tipo de clasificadores.\n",
+        "    \n",
+        "Contenidos:\n",
+        "1. Introducción    \n",
+        "2. Máquinas de Vectores Soporte (SVM)\n",
+        "3. Redes Neuronales Artificiales y Deep Learning (DL)    \n",
+        "3. Ensembles y Random Forest     \n",
+        "4. Referencias bibliográficas"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "eo3h6f7lH_Am"
+      },
+      "source": [
+        "## **1. INTRODUCCIÓN**\n",
+        "\n",
+        "En esta primera sección, se llevará a cabo una presentación sobre los paradigmas de clasificación avanzados que se describirán a lo largo del presente Módulo. A continuación, se cargarán y almacerán en variables de Python los datos del problema sobre melanoma cutáneo con los que se viene trabajando hasta ahora. Además, este conjunto de datos se transformará reduciendolo a solamente dos dimensiones (variables de entrada) para realizar representaciones gráficas que ilustren el funcionamiento de cada técnica o algoritmo de clasificación en Machine Learning.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Pt5ax5BsblPY"
+      },
+      "source": [
+        "### **1.1 Paradigmas de clasificación: modelos avanzados**\n",
+        "\n",
+        "Existen casos de estudio en los que se prima la máxima capacidad predictiva o acierto obtenido para la elección del modelo de clasificación. En este apartado, entrarían en juego los denominados \"modelos de caja negra\". Son algoritmos que obtienen un modelo de alto rendimiento, pero por contrapartida son complejos, es decir, no son directamente comprensibles por el usuario humano. En otras palabras, su comportamiento es robusto frente a problemas difíciles, aunque suelen implicar un mayor coste computacional en su aprendizaje (más recursos de CPU, memoria, más tiempo de ejecución, etc.), y necesitan un mayor nivel de conocimiento para su correcto uso.\n",
+        "\n",
+        "Se observa por tanto que las características de los modelos de \"caja blanca\" descritos en el anterior apartado del curso, como Regresión Logística o Árboles de Decisión, y estas nuevas soluciones, son prácticamente opuestas. Por ese motivo, es importante determinar cuándo resulta más adecuado utilizar cada tipo de técnica de Machine Learning, así como conocer bien sus características para así utilizarlos correctamente.\n",
+        "\n",
+        "En concreto, se describirán las Máquinas de Vectores Soporte (SVM) y los modelos tipo Ensemble, en concreto el conocido algoritmo Random Forest."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "6GDXE_2kHFjS"
+      },
+      "source": [
+        "### **1.2 Cargar los datos del problema**\n",
+        "\n",
+        "\n",
+        "Con el objetivo de comprobar el comportamiento de los diferentes algoritmos de clasificación, se comienza incorporando los datos del caso de estudio que sirve como hilo conductor del presente curso. La notación o código utilizado es exactamente el mismo que en actividades anteriores."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "2FFxCHjDHFjT"
+      },
+      "source": [
+        "import pandas as pd\n",
+        "\n",
+        "#Cargamos los datos ómicos de la matriz de expresión desde un fichero compartido en Google Drive\n",
+        "gene_exp_inmune = pd.read_csv('https://drive.google.com/uc?id=1PYzEIdmnfjOnBpPDIFBE9hL1Lkj_OBCk',index_col=0)\n",
+        "#Cargamos la variable clínica correspondiente a las etiquetas \"inmune\" vs. \"MITF-low\"\n",
+        "clinical_info_inmune = pd.read_csv('https://drive.google.com/uc?id=1hHQfcvrFa5Jds-9tW_X4sHjKpYKdii9s',index_col=0)\n",
+        "\n",
+        "X, y = gene_exp_inmune, clinical_info_inmune\n",
+        "\n",
+        "#Imprimimos las 5 primeras muestras del conjunto de datos para comprobar que se ha cargado correctamente\n",
+        "X.head()"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "dkVSfjaU2K2h"
+      },
+      "source": [
+        "Adicionalmente, tal como se realizó en la cápsula anterior (\"**Métodos estándar de clasificación**\"), para ilustrar el funcionamiento de cada clasificador, se procede a transformar el conjunto inicial de datos en un formato de 2 dimensiones (seleccionando únicamente dos variables de entrada). Es exactamente el mismo código que se incluyó en la cápsula anterior."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "-th95q0C--YZ"
+      },
+      "source": [
+        "from sklearn.decomposition import PCA\n",
+        "from sklearn.preprocessing import StandardScaler\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns\n",
+        "\n",
+        "#Transformamos el conjunto de datos inicial para que esté representado por solo 2 variables\n",
+        "n_componentes = 2\n",
+        "pca = PCA(n_components=n_componentes)\n",
+        "X_2D = pca.fit_transform(X)\n",
+        "\n",
+        "#Se transforma el rango de cada variable a [0, 1]\n",
+        "st = StandardScaler()\n",
+        "X_2D = st.fit_transform(X_2D)\n",
+        "\n",
+        "#Transformamos el conjunto resultando a una estructura data_frame (pandas) para facilitar la representación gráfica\n",
+        "df = pd.DataFrame(X_2D, columns = ['PCA_V1','PCA_V2'])\n",
+        "df = df.join(y)\n",
+        "\n",
+        "#Mostramos en un diagrama de dispersión el nuevo conjunto 2D, junto con las funciones de densidad\n",
+        "sns.pairplot(df, hue='RNASEQ-CLUSTER_CONSENHIER', markers=[\"o\", \"s\"], height=3);"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "I5WEw_qg2ThQ"
+      },
+      "source": [
+        "Por simplicidad, para los ejemplos incluidos en este NoteBook se utilizará una validación tipo \"*hold-out*\" por defecto. Para más detalles consúltese el **Módulo 3** sobre Aprendizaje Supervisado."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "CxddBF3p2VWt"
+      },
+      "source": [
+        "from sklearn.model_selection import train_test_split\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)\n",
+        "\n",
+        "y_int = pd.get_dummies(y).iloc[:,0]\n",
+        "X_2D_train, X_2D_test, y_2D_train, y_2D_test = train_test_split(X_2D, y_int, random_state=42)\n",
+        "\n",
+        "print(\"Numero de instancias en entrenamiento: {}; y test: {}\".format(len(X_train),len(X_test)))"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ka7UfXUf1Qeq"
+      },
+      "source": [
+        "## **2. MÁQUINAS DE VECTORES SOPORTE (SVM)**\n",
+        "\n",
+        "Los modelos basados en **Máquinas de Vectores Soporte** (en inglés *Support Vector Machine o SVM*) son una de las herramientas preferidas por muchos científicos de datos. La razón es sencilla, ya que obtienen una alta precisión incluso en problemas complejos, utilizando relativamente poca potencia de cálculo. Adicionalmente, pueden ser empleados tanto para tareas de regresión como de clasificación, si bien es en esta última tarea donde mayor relevancia tiene.\n",
+        "\n",
+        "Este apartado, arranca con una introducción completa sobre las principales características y funcionamiento de las SVM. A continuación, se indica cómo hacer uso de este paradigma de clasificación mediante Scikit-Learn. Por último, se enumeran brevemente los pros y contras de este tipo de modelo.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "fTf3sCQDcJeS"
+      },
+      "source": [
+        "### **2.1 Introducción a las SVM**\n",
+        "\n",
+        "El objetivo de una SVM es el de encontrar un hiperplano de separación entre las instancias de dos clases. Un hiperplano es exactamente el mismo tipo de función discriminante que se utilizó para otros clasificadores de tipo lineal, como por ejemplo la *regresión logística*. Recuérdese la ecuación del hiperplano, que no deja de ser un producto escalar de un vector de variables de entrada $x$ con un vector de pesos o importancia de las mismas $w$ $\\|x,w\\|$:\n",
+        "\n",
+        "\\begin{equation}\n",
+        "\\hat{y}(x,w) = w_0 + w_1 \\cdot x_1 + \\ldots + w_n \\cdot x_n\n",
+        "\\end{equation}\n",
+        "\n",
+        "La diferencia de SVM con respecto a otros métodos de separación lineal, es que entre todos los posibles hiperplanos que dividen las instancias en dos partes, se escoge aquél que obtiene un margen máximo. Este margen se calcula como la máxima distancia entre las instancias frontera, tal como se representa en la siguiente figura:\n",
+        "\n",
+        "![Margen calculado por la SVM](https://imgur.com/bNN5IAP.png)\n",
+        "\n",
+        "El nombre de esta técnica de aprendizaje viene determinado justamente por estas instancias en las que se \"apoya\" la frontera de decisión. Son los puntos más cercanos al hiperplano, e influyen directamente en su orientación para alcanzar el citado margen máximo.\n",
+        "\n",
+        "Existen diferentes mecanismos o aproximaciones matemáticas para encontrar la orientación óptima del hiperplano, si bien lo más importante es que dependen principalmente de la distancia de las instancias mal clasificadas (al otro lado de la \"frontera lineal\"). Por este motivo, el parámetro más importante de una SVM es el **Coste**, denominado como `C`:\n",
+        "\n",
+        "- Un valor bajo aceptaría cometer un cierto número de errores de clasificación, bajando ligeramente la calidad de predicción obtenida en el conjunto de entrenamiento, pero buscando una mejor generalización en test.\n",
+        "- Un valor alto permite ajustar mejor el modelo sobre los datos de entrenamiento, pero implicaría un mayor riesgo de sobreaprendizaje.\n",
+        "\n",
+        "A pesar de lo anterior, un simple hiperplano no es la solución adecuada cuando las clases representadas en el problema no son linealmente separables (el problema es difícil), o cuando existe mucho ruido en los datos (se han cometido algunos errores en la captura de la información del problema). Sin embargo, se ha comentado que las SVMs son una herramienta que alcanza grandes resultados predictivos incluso en problemas complejos ¿cómo lo consigue?\n",
+        "\n",
+        "La solución empleada se conoce como *kernel trick*, y consiste básicamente en asignar los datos en un espacio más complejo, con variables no lineales, y usar el clasificador SVM lineal (la aproximación básica anteriormente descrita) en este nuevo espacio. Por ejemplo, añadiendo una nueva dimensión o variable, podemos encontrar una separación adecuada de los datos, como se aprecia en la siguiente figura:\n",
+        "\n",
+        "![transformación no lineal de los datos para crear una frontera lineal](https://i.imgur.com/AnUGAb7.png)\n",
+        "\n",
+        "Para cambiar el espacio de datos de las variables de entrada, se utilizan las denominadas *funciones kernel* (de ahí el nombre *kernel trick*), que son las incrementan la dimensionalidad del problema (\"añaden nuevas variables\"), haciendo transformaciones matemáticas no lineales. Los dos ejemplos más comunes de este tipo de funciones kernel son las siguientes:\n",
+        "\n",
+        "- Función polinomial: $K(x,w) = \\langle x, w \\rangle ^d$. De este modo, la sumatoria lineal de los productos de pesos $w_i$ y variables $x_i$ se transforma a un polinomio de mayor grado (2, 3, etc.). Así, en lugar de un hiperplano o \"línea recta\" tendremos una división de los datos más compleja.  \n",
+        "- Función *Radial Base Function* (RBF): $K(x,w) = e^{-\\frac{\\|x-w\\|^2}{2\\cdot\\sigma}}$. Con el uso de funciones RBF las funciones discriminantes no-lineales en este caso se representan como áreas \"circulares\".\n",
+        "\n",
+        "No existe una respuesta universal sobre qué tipo de kernel utilizar, dependiendo mucho de las características del problema. Los kernel polinomiales son más sencillos, con menor tendencia al sobreaprendizaje cuando el grado es pequeño (menor o igual a 5). Los kernel RBF obtienen un mayor acierto en general, puesto que encuentran funciones discriminantes más complejas que permiten separar mejor las clases. Para ello se utiliza un parámetro conocido como \"gamma\" ($\\gamma$) que controla cómo se realiza la transformación del conjunto de datos, y por tanto valores altos tenderán al sobreaprendizaje.\n",
+        "\n",
+        "Encontrar la combinación ideal entre los parámetros de coste `C` y del kernel `d` o $\\gamma$ es una tarea bastante complicada, para la que se suelen utilizar procedimientos de ajuste de hiperparámetros como [Grid Search](https://scikit-learn.org/stable/modules/grid_search.html), cuyos detalles escapan a los objetivos del presente curso.  \n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "bQbDzFPIfFZf"
+      },
+      "source": [
+        "### **2.2 Implementación de las SVM en Python**\n",
+        "\n",
+        "Siguiendo el formato de todos los métodos de aprendizaje en *Scikit-Learn*, para ejecutar una SVM basta con crear un objeto de la clase `SVC` y ajustar utilizando los conjunto `X` e `y`, tal como se muestra a continuación:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "u0sxqfyj8mO6"
+      },
+      "source": [
+        "from sklearn import svm\n",
+        "from sklearn.metrics import accuracy_score\n",
+        "import warnings\n",
+        "warnings.filterwarnings(\"ignore\")\n",
+        "\n",
+        "clf = svm.SVC(probability=True) #parámetro para que se pueda calcular AUC\n",
+        "clf.fit(X_train,y_train)\n",
+        "\n",
+        "y_pred = clf.predict(X_test)\n",
+        "acc = accuracy_score(y_test,y_pred)\n",
+        "print(\"El porcentaje de acierto obtenido es\",acc*100)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "F10KZ1UtizG0"
+      },
+      "source": [
+        "from sklearn import metrics\n",
+        "import matplotlib.pyplot as plt\n",
+        "\n",
+        "metrics.ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test,cmap='binary')\n",
+        "plt.title(\"Matriz de confusión obtenida para el clasificador SVM\")\n",
+        "plt.show()\n",
+        "\n",
+        "print(metrics.classification_report(y_test,y_pred))\n",
+        "\n",
+        "f1 = metrics.f1_score(y_test,y_pred,pos_label='immune')\n",
+        "print(\"La medida F1 para el clasificador %s es %.4f\"%(clf.__class__.__name__,f1))\n",
+        "\n",
+        "y_probs = clf.predict_proba(X_test)\n",
+        "auc = metrics.roc_auc_score(y_test, y_probs[:,1])\n",
+        "print(\"La medida AUC para el clasificador %s es %.4f\"%(clf.__class__.__name__,auc))\n",
+        "metrics.RocCurveDisplay.from_estimator(clf, X_test, y_test)\n",
+        "plt.title(\"Curva ROC obtenida para el clasificador SVM\")\n",
+        "plt.show()"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "qX_s1q0n91vV"
+      },
+      "source": [
+        "Se debe hacer énfasis en la especial importancia que tienen los parámetros de configuración (hiperparámetros) en el algoritmo SVM. A continuación, se recuerdan cuáles son los principales y su notación específica en *Python*:\n",
+        "\n",
+        "- `C`: un valor real (`float`) que indica el parámetro de regularización o coste. Debe ser siempre positivo, donde mayores valores buscar un mejor ajuste a los datos de entrenamiento (por defecto=1.0).\n",
+        "\n",
+        "- `kernel`: un valor entre {‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’}, que especifica el tipo de kernel usado en el algoritmo (por defecto ’rbf’).\n",
+        "\n",
+        "- `degree`: un valor entero (`int`) que indica el grado del kernel polinominal (`poly`) por lo que se ignora para el resto (por defecto=3). Es el parámetro anteriormente notado como `d`.\n",
+        "\n",
+        "- `gamma`: es un valor a elegir entre {‘scale’, ‘auto’} o un número real (`float`). Es el coeficiente del kernel para los casos ‘rbf’, ‘poly’ y ‘sigmoid’ (por defecto=’scale’, que equivale a `1 / (n_features * X.var())`; siendo ‘auto’ `1 / n_features`)."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Q-evSFTNYuPo"
+      },
+      "source": [
+        "Por último, se muestran las fronteras generadas de acuerdo a diferentes kernel y valores del parámetro. Varios aspectos llaman la atención en este punto:\n",
+        "\n",
+        "1. Las fronteras representadas cuando se utiliza el kernel `rbf` suelen ser de tipo elíptico, mientras que para el polinomial (`poly`) presentan una tendencia de tipo \"lineal\".\n",
+        "2. Al incrementar el parámetro `C` (SVM con RBF) usualmente se observan las fronteras más pegadas a los puntos de entrenamiento.\n",
+        "3. Al incrementar el parámetro `degree` (SVM polinomial) se observan fronteras mucho más complejas.\n",
+        "4. La representación gráfica de las funciones discriminantes en ocasiones parece que no coinciden con la posición de las instancias del conjunto de datos. Esto es totalmente natural, dado que en realidad la frontera se visualiza directamente sobre las nuevas variables que se construyen para poder encontrar una función discriminante lineal de separación entre los datos.\n",
+        "\n",
+        "Puesto que son muchos cálculos, puede que tarde unos segundos en mostrar los resultados.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "z5sWhz-xxNEI"
+      },
+      "source": [
+        "#Se importa una biblioteca especial para pintar en 2D\n",
+        "from sklearn.inspection import DecisionBoundaryDisplay\n",
+        "import itertools\n",
+        "\n",
+        "#Creamos y entrenamos los clasificadores SVM con los datos 2D\n",
+        "svm_rbf_1 = svm.SVC(kernel='rbf',C=1)\n",
+        "svm_rbf_100 = svm.SVC(kernel='rbf',C=100)\n",
+        "svm_poly_2 = svm.SVC(kernel='poly',degree=2,C=1)\n",
+        "svm_poly_5 = svm.SVC(kernel='poly',degree=5,C=1)\n",
+        "svms = [svm_rbf_1, svm_rbf_100, svm_poly_2, svm_poly_5] #lista\n",
+        "\n",
+        "#Parámetros que se utilizarán para visualizar la figura\n",
+        "scatter_kwargs = {'s': 120, 'edgecolor': None, 'alpha': 0.7}\n",
+        "contourf_kwargs = {'alpha': 0.2}\n",
+        "scatter_highlight_kwargs = {'s': 120, 'label': 'Test data', 'alpha': 0.7}\n",
+        "\n",
+        "#Necesario para pintar las 4 gráficas juntas\n",
+        "#gs = gridspec.GridSpec(2, 2)\n",
+        "#fig = plt.figure(figsize=(15,12))\n",
+        "\n",
+        "identificador = ['SVM RBF C1', 'SVM RBF C100', 'SVM Poly D2', 'SVM Poly D5']\n",
+        "for clf, etq, grd in zip(svms, identificador, itertools.product([0, 1], repeat=2)):\n",
+        "    clf.fit(X_2D_train, y_2D_train)\n",
+        "    score = clf.score(X_2D_test,y_2D_test)\n",
+        "    #fig = plot_decision_regions(X=X_2D, y=y_int.to_numpy().ravel(), clf=clf,\n",
+        "    #                            X_highlight=X_2D_test, legend=2,\n",
+        "    #                            scatter_kwargs=scatter_kwargs,\n",
+        "    #                            contourf_kwargs=contourf_kwargs,\n",
+        "    #                            scatter_highlight_kwargs=scatter_highlight_kwargs)\n",
+        "\n",
+        "    fig = DecisionBoundaryDisplay.from_estimator(clf, X_2D,\n",
+        "                                              response_method=\"predict\",\n",
+        "                                              alpha=0.5,\n",
+        "                                              cmap=plt.cm.coolwarm)\n",
+        "    fig.ax_.scatter(X_2D[:, 0], X_2D[:, 1],\n",
+        "                 c=y_int, edgecolor=\"k\",\n",
+        "                 cmap=plt.cm.coolwarm)\n",
+        "\n",
+        "    plt.show()"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "rbMp7y5c3v44"
+      },
+      "source": [
+        "### **2.3 Características de las SVM**\n",
+        "\n",
+        "Del mismo modo que el resto de paradigmas de clasificación, las SVMs poseen distintas propiedades que les hacen preferibles en distintos escenarios, o que pueden suponer complicaciones para su correcto uso.\n",
+        "\n",
+        "En primer lugar, se enumeran las principales ventajas de SVM:\n",
+        "\n",
+        "- Eficaces en problemas con una *alta dimensionalidad*. Obtienen buenas soluciones incluso cuando el número de variables de entrada es alto.\n",
+        "- Buen comportamiento en aquéllos casos en que el *número de variables es mayor que el número de instancias*. Esto resulta de vital importancia en problemas de carácter bioinformático.\n",
+        "- *Eficiente en memoria*. El modelo se basa únicamente en almacenar los \"vectores soporte\" encontrados en entrenamiento.\n",
+        "- *Versátil*. Se adapta bien a distintos problemas configurando la función kernel más apropiada en cada caso de estudio.\n",
+        "\n",
+        "En segundo lugar, entre las desventajas de las SVM se incluyen:\n",
+        "\n",
+        "- *Dificultad en la parametrización*. El comportamiento del modelo SVM es muy dependiente de los parámetros seleccionados para el *coste*  y la función *kernel*. No es sencillo encontrar unos valores óptimos, y por tanto supone emplear una etapa denominada como \"hiperparametrización\" que tampoco garantiza los mejores resultados.\n",
+        "- *Tratamiento de datos nominales*. Igual que el resto de clasificadores lineales, no están adaptados a características que no sean numéricas. La solución es aplicar una transformación que genere nuevas variables mediante una codificación binaria.\n",
+        "- *Exclusividad en problemas binarios*. Por defecto, las SVMs no permiten una clasificación en problemas de más de dos clases, debiendo recurrir a  estrategias tipo \"divide-y-vencerás\" (transformar el problema en múltiple subproblemas de clases binarias).\n",
+        "- *Cálculo poco preciso sobre las probabilidades de salida*. En caso que se necesite obtener valores de probabilidad o confianza para la salida, por ejemplo para calcular la métrica AUC, los valores que obtiene una SVM suelen ser poco fiables.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## **3. REDES NEURONALES ARTIFICIALES Y DEEP LEARNING**\n",
+        "\n",
+        "Las Redes Neuronales Artificiales (ANNs por sus siglas en inglés) están inspiradas en la forma en que funciona el cerebro humano. Muy simplificadamente, imagina que una ANN es como una red de pequeñas unidades llamadas neuronas que trabajan juntas para resolver problemas.\n",
+        "\n",
+        "En las ANNs las neuronas se organizan de acuerdo a diferentes capas. Las primeras capas suelen ser para recibir información, como datos (variables) de entrada, y las últimas capas proporcionan la respuesta o resultado (ej. etiqueta de clase). Lo interesante sucede entre medias, en denominadas como las capas ocultas, como se estudiará más adelante. A medida que el número de capas ocultas aumenta, entramos en lo que se llama \"Deep Learning\" (DL). El DL permite que la red aprenda y represente características más complejas y abstractas, en especial para problemas con datos no estructurados como texto, imágenes o señales.\n",
+        "\n",
+        "En el resto de esta sección, se introducirá con más detalle el concepto de neurona y capa, y se describirá cómo se realiza el entrenamiento de un modelo basado en ANNs. Posteriormente, se presentará cómo utilizar esta herramienta con Python (vía `scikit-learn`). A continuación, se indicarán las características correspondientes a su uso. Finalmente, se darán algunos apuntes con respecto a la relación entre ANNs y DL.  "
+      ],
+      "metadata": {
+        "id": "KQrVAwgz_MRr"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### 3.1 ¿Qué es una Red Neuronal Artificial?\n",
+        "\n",
+        "#### 3.1.1 La neurona básica: el Perceptron\n",
+        "\n",
+        "Todo arranca a principios de los años 40 con la invención del que será denominado como unidad básica de procesamiento en una red neuronal: el **Perceptrón**. Matemáticamente, el perceptrón toma un conjunto de entradas ($i_1,i_2,\\ldots,i_n$), aplica pesos a esas entradas y produce una salida ($o$). Esta salida se obtiene aplicando una función de activación a la suma ponderada de las entradas y los pesos. La función de activación puede ser una simple función escalón, que dispara si la suma ponderada supera un cierto umbral.\n",
+        "\n",
+        "![Representación del perceptron (tomado de Wikipedia)](https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Perceptron.svg/706px-Perceptron.svg.png)\n",
+        "\n",
+        "Si esta estructura te recuerda a algo, estás en lo cierto: un perceptrón puede considerarse como un tipo de clasificador lineal básico (como los vistos en el Módulo 5.2). Al igual que el clasificador lineal, su capacidad es limitada cuando se trata de datos más complejos que no son linealmente separables. Es aquí donde entran en juego las ANNs ampliando el número de capas y neuronas utilizadas.\n",
+        "\n",
+        "#### 3.1.2 Las capas ocultas\n",
+        "\n",
+        "Una red neuronal se puede definir como una colección de perceptrones organizados en capas (bloques de neuronas). Además de la capa de entrada (cuyo número de neuronas coincide con el número de entradas) y la capa de salida (que normalmente es una única neurona para una salida binaria), puede haber capas intermedias llamadas **capas ocultas**.\n",
+        "\n",
+        "La capa oculta es donde ocurre la magia en una red neuronal. Cada nodo o \"neurona\" en esta capa toma las salidas de perceptrones en la capa anterior (puede ser directamente la entrada, u otra capa oculta), aplica sus pesos, agrega los resultados y pasa el resultado a través de lo que se denomina una **función de activación**. Esto permite que la red aprenda y capture características y patrones complejos (no lineales) en los datos. En otras palabras, representan características intermedias o abstracciones de las entradas.\n",
+        "\n",
+        "Así, en este caso estaríamos considerando el denominado como Perceptrón Muti-capa o **Multi-Layer Perceptron (MLP)**. En la siguiente figura se ilustra un MLP con tres capas:\n",
+        "\n",
+        "- la primera es la capa de entrada con 3 neuronas, lo que corresponde a un problema reprentado por 3 variables descriptivas;\n",
+        "- la segunda corresponde con la cada oculta, con 4 neuronas en total;\n",
+        "- la última corresponde con la capa de salida, en este caso con dos neuronas que pueden codificar hasta 4 valores diferentes.\n",
+        "\n",
+        "Nótese que todas las neuronas de una capa se conectan con todas las neuronas de la siguiente capa, siguiendo un esquema denominado como **fully-connected**.\n",
+        "\n",
+        "![Ejemplo de ANN con una única capa oculta](https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Colored_neural_network_es.svg/420px-Colored_neural_network_es.svg.png)\n",
+        "\n",
+        "#### 3.1.3 Relación con la Función de Activación\n",
+        "Tal como se ha indicado, cada neurona en la capa oculta aplica una función matemática a su resultado. Esta función de activación determina si la neurona debe \"disparar\" (enviar una señal) o no, en función de la suma ponderada de sus entradas. Algunas de las funciones de activación más comunes son:\n",
+        "\n",
+        "- **ReLU (Rectified Linear Unit)**: $f(x) = max(0, x)$\n",
+        "- **Sigmoid**: $f(x) = \\frac{1}{1 + e^{(-x)}}$\n",
+        "- **Tanh (Tangente hiperbólica)**: $f(x) = \\frac{e^x - e^{(-x)}}{e^x + e^{(-x)}}$\n",
+        "\n",
+        "La elección de la función de activación puede influir en cómo la red aprende y se comporta. Por ejemplo, la función `ReLU` es comúnmente utilizada porque es eficiente y evita ciertos problemas en el aprendizaje. La función `sigmoid` es útil en problemas de clasificación binaria, mientras que la función `tanh` es útil en situaciones en las que las entradas tienen valores negativos y positivos.\n",
+        "\n",
+        "### 3.2 Entrenamiento mediante retroalimentación (backpropagation): Un Viaje de Aprendizaje\n",
+        "\n",
+        "Entrenar una ANN es un proceso fascinante que se asemeja al aprendizaje humano basado en ejemplos. Imagina a una ANN como un estudiante que mejora su desempeño a través de la práctica constante. En concreto, lo que realmente se ajusta en la estructura de una ANN son los valores de los pesos en las conexiones entre neuronas. Esto es lo que se denominan los **parámetros de la red**. A mayor número de parámetros, mayor será la complejidad de la red para aprender problemas más difíciles, pero a mayor coste computacional.\n",
+        "\n",
+        "A continuación, se explora cómo funciona este proceso de entrenamiento, haciendo hincapié en términos sencillos y conceptos clave.\n",
+        "\n",
+        "#### 3.2.1 Paso 1: Inicialización y Pesos Aleatorios\n",
+        "Se comienza con una red neuronal vacía (solo la estructura de neuronas en capas). Al igual que un estudiante en su primer día de clase, no sabe nada. Así, los pesos de las conexiones entre las neuronas se inicializan aleatoriamente.\n",
+        "\n",
+        "#### 3.2.2 Paso 2: Alimentación Hacia Adelante (*Forward Propagation*)\n",
+        "Como estudiantes, la ANN recibe datos de entrenamiento (el conjunto de datos completo). La información se propaga a través de la red desde la capa de entrada hasta la capa de salida. Cada neurona realiza cálculos matemáticos en función de los datos de entrada y los pesos de las conexiones, a través de la conocida función de activación. Estos cálculos producen una respuesta de la red (valor decodificado de la(s) neurona(s) de salida), que en principio será la etiqueta predicha de clase.\n",
+        "\n",
+        "#### 3.2.3 Paso 3: Comparación con la Respuesta Deseada\n",
+        "La red compara su respuesta con la respuesta deseada (la respuesta correcta). Similar a cómo un estudiante compara sus respuestas en un examen con las respuestas correctas. Esta comparación genera un \"error\", que mide qué tan cerca o lejos está la red de la respuesta correcta. Este error se mide mediante lo que se denomina como función de pérdida o **loss function**. Un ejemplo trivial de *loss function* podría ser $1 - accuracy$.  \n",
+        "\n",
+        "#### 3.2.4 Paso 4: Retropropagación del Error (*Backpropagation*)\n",
+        "Aquí entra en juego la \"retroalimentación\". La red ajusta sus conexiones (pesos) en función del error. Si la respuesta es incorrecta, la red modifica sus conexiones de manera que la próxima vez se acerque más a la respuesta deseada. Este proceso se llama \"backpropagation\" y se asemeja al aprendizaje basado en retroalimentación que los estudiantes hacen para mejorar.\n",
+        "\n",
+        "#### 3.2.5 Tasa de Aprendizaje (*Learning Rate*):\n",
+        "Imagina que el estudiante tiene una tasa de aprendizaje, que determina cuánto cambia sus respuestas en función de sus errores. Si la tasa de aprendizaje es alta, aprende rápidamente pero puede ser *inestable*. Si es baja, aprende lentamente pero con mayor precisión.\n",
+        "\n",
+        "#### 3.2.6 Iteración y Práctica Constante:\n",
+        "Este proceso se repite muchas veces. La red sigue viendo ejemplos, cometiendo errores y ajustándose; los ejemplos de entrada van incorporándose a la red en lotes, y este proceso se repite haciendo varias \"pasadas\" al conjunto de datos. Es como un estudiante que sigue practicando los mismos ejercicios una y otra vez para mejorar sus habilidades.\n",
+        "\n",
+        "Con cada ciclo de entrenamiento, la ANN se vuelve más y más competente, como un estudiante que se convierte en un experto en una materia. A través del backpropagation, la tasa de aprendizaje y la regularización, la red neuronal aprende a resolver problemas de manera efectiva. Así, podemos identificar la denominada *convergencia de la red*, es decir su efectividad en el correcto ajuste al problema en cada ciclo.\n",
+        "\n",
+        "### 3.3 Cálculo de la salida de una red neuronal y Extensión a Múltiples Clases\n",
+        "\n",
+        "Hasta este punto, hemos hablado principalmente de redes neuronales con una sola neurona de salida, lo que permite codificar un valor binario $\\{ 0,1 \\}$ según supere o no un umbral de activación, por defecto mediante la función sigmoide. Esto las hace ideales para problemas de decisión dicotómicas, como diagnosticar enfermedades como presentes o ausentes.\n",
+        "\n",
+        "En estos casos, la red neuronal ajusta su respuesta para acercarse a 0 o 1, lo que equivale a decir \"sí\" o \"no\". Sin embargo, como bien sabemos, en el mundo real a menudo nos enfrentamos a problemas más complejos donde las respuestas no son simplemente \"sí\" o \"no\", sino que pueden pertenecer a varias categorías.\n",
+        "\n",
+        "En tales casos, utilizamos un número más alto de neuronas junto con funciones de activación especiales para extender la salida de una red neuronal a múltiples clases. Una función común es la función **\"Softmax\"**. Esta función calcula la probabilidad de que una muestra pertenezca a cada clase, y la suma de estas probabilidades es igual a 1.\n",
+        "\n",
+        "Así que, la salida de la red se extiende para acomodar diferentes clases, y las funciones de activación como `Softmax` permiten asignar probabilidades a cada clase. Esta es la magia que permite a las redes neuronales manejar problemas de múltiples clases, como reconocimiento de dígitos escritos a mano o clasificación de imágenes en categorías diversas.\n"
+      ],
+      "metadata": {
+        "id": "8vNmuSqj_Zxh"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### 3.2 Implementación de las redes neuronales en Python\n",
+        "\n",
+        "En esta sección se dan los detalles necesarios para construir un modelo basado en el perceptrón multi-capa (`MLPClassifier`), que se encuentra en la biblioteca `neural_network`.\n",
+        "\n",
+        "En este ejemplo, se creará una red neuronal con una única capa oculta de 10 neuronas, y se entrenará la red durante 1000 iteraciones. Se pueden ajustar estos valores según las necesidades de cada problema, tal como se describirá más abajo."
+      ],
+      "metadata": {
+        "id": "nw9waSt3_d0H"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.neural_network import MLPClassifier\n",
+        "\n",
+        "# Creamos y entrenamos la red neuronal (random_state se usa para ofrecer los mismos resultados cada vez que se ejecuta)\n",
+        "clf = MLPClassifier(hidden_layer_sizes=(10,), max_iter=1000, random_state=42)\n",
+        "clf.fit(X_train, y_train)\n",
+        "\n",
+        "#Probamos su calidad predictiva\n",
+        "y_pred = clf.predict(X_test)\n",
+        "acc = accuracy_score(y_test,y_pred)\n",
+        "print(\"El porcentaje de acierto obtenido es\",acc*100)\n"
+      ],
+      "metadata": {
+        "id": "ksXYTAIPoC9D"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "metrics.ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test,cmap='binary')\n",
+        "plt.title(\"Matriz de confusión obtenida para el clasificador ANN\")\n",
+        "plt.show()\n",
+        "\n",
+        "print(metrics.classification_report(y_test,y_pred))\n",
+        "\n",
+        "f1 = metrics.f1_score(y_test,y_pred,pos_label='immune')\n",
+        "print(\"La medida F1 para el clasificador %s es %.4f\"%(clf.__class__.__name__,f1))\n",
+        "\n",
+        "y_probs = clf.predict_proba(X_test)\n",
+        "auc = metrics.roc_auc_score(y_test, y_probs[:,1])\n",
+        "print(\"La medida AUC para el clasificador %s es %.4f\"%(clf.__class__.__name__,auc))\n",
+        "metrics.RocCurveDisplay.from_estimator(clf, X_test, y_test)\n",
+        "plt.title(\"Curva ROC obtenida para el clasificador ANN\")\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "qUcWNO28pIbY"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Creamos y entrenamos el clasificador con los datos 2D\n",
+        "clf = MLPClassifier(hidden_layer_sizes=(10,), max_iter=1000, random_state=42)\n",
+        "clf.fit(X_2D_train, y_2D_train)\n",
+        "score = clf.score(X_2D_test,y_2D_test)\n",
+        "\n",
+        "fig = plt.figure(figsize=(12,9))\n",
+        "fig = DecisionBoundaryDisplay.from_estimator(clf, X_2D,\n",
+        "                                              response_method=\"predict\",\n",
+        "                                              alpha=0.5,\n",
+        "                                              cmap=plt.cm.coolwarm)\n",
+        "\n",
+        "fig.ax_.scatter(X_2D[:, 0], X_2D[:, 1],\n",
+        "                 c=y_int, edgecolor=\"k\",\n",
+        "                 cmap=plt.cm.coolwarm)\n",
+        "\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "8YIS18jc8whf"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Al igual que pasaba en las SVMs, los hiperparámetros de las ANNs tienen una influencia significativa en el comportamiento y capacidad predictiva del modelo, es decir, cuán bien o mal se ajustará a los datos para reproducir fielmente la información del problema. De este modo, encontrar un buen equilibrio entre infra-entrenamiento y sobre-entrenamiento es bastante complejo, y se suelen utilizar procedimientos de optimización tipo `GridSearch` como en el caso de las SVMs.\n",
+        "\n",
+        "Cuando se utiliza una ANN, existe un alto número de variables de configuración (hiperparámetros) que ajustar, así que a continuación se muestran únicamente aquellos más importantes:\n",
+        "\n",
+        "- `hidden_layer_sizes`: Esta es una configuración que representa el número de neuronas en cada capa oculta de una red neuronal. Por ejemplo, si se desea aplicar una sola capa oculta con 100 neuronas, se configuraría como `hidden_layer_sizes=(100,)` (este es el valor que se toma por defecto).\n",
+        "\n",
+        "- `activation`: Como se indicó anteriormente, la función de activación es una parte importante de una red neuronal. Es la función matemática que determina si una neurona debe disparar o no. Hay varias opciones comunes, como `'identity'`, que no hace nada (es decir, no activa ni desactiva la neurona), `'logistic'`, que utiliza la función sigmoide, `'tanh'`, que utiliza la tangente hiperbólica, y `'relu'`, que es la función de unidad lineal rectificada (que es la que se toma por defecto).\n",
+        "\n",
+        "- `learning_rate_init`: Esta es la tasa de aprendizaje inicial. Controla el tamaño de los pasos que la red toma al ajustar sus pesos (por defecto `learning_rate_init=0.001`).\n",
+        "\n",
+        "- `max_iter`: Es el número máximo de iteraciones que la red realizará durante el entrenamiento. Si no converge antes de alcanzar este número, el entrenamiento se detendrá (por defecto `max_iter = 200`)."
+      ],
+      "metadata": {
+        "id": "oavUGVaWohfL"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Veamos la influencia de algunos de estos parámetros en los resultados (tardará algunos segundos en ejecutar)\n",
+        "import numpy as np\n",
+        "\n",
+        "# Parámetros que vamos a variar\n",
+        "num_layers = [1, 2, 3]\n",
+        "num_neurons = [5, 10, 15]\n",
+        "learning_rates = [0.001, 0.01, 0.1]\n",
+        "max_iterations = [100, 500, 1000]\n",
+        "\n",
+        "# Almacenaremos los resultados del accuracy\n",
+        "accuracies = []\n",
+        "\n",
+        "# Iteramos a través de diferentes configuraciones\n",
+        "for layers in num_layers:\n",
+        "    for neurons in num_neurons:\n",
+        "        for rate in learning_rates:\n",
+        "            for iterations in max_iterations:\n",
+        "                clf = MLPClassifier(hidden_layer_sizes=(neurons,) * layers, max_iter=iterations, learning_rate_init=rate, random_state=42)\n",
+        "                clf.fit(X_train, y_train)\n",
+        "                accuracy = clf.score(X_test, y_test)\n",
+        "                accuracies.append((layers, neurons, rate, iterations, accuracy))\n",
+        "\n",
+        "# Extraemos los valores de precisión\n",
+        "accuracies = np.array(accuracies)\n",
+        "\n",
+        "# Mostramos los resultados gráficamente\n",
+        "plt.figure(figsize=(10, 6))\n",
+        "plt.scatter(accuracies[:, 0] * accuracies[:, 1], accuracies[:, 4], c=accuracies[:, 2], cmap='viridis')\n",
+        "plt.xlabel('Número de Neuronas (Total)')\n",
+        "plt.ylabel('Accuracy')\n",
+        "plt.title('Influencia de los Hiperparámetros en MLP (Neuronas vs LR)')\n",
+        "plt.colorbar(label='Tasa de Aprendizaje')\n",
+        "plt.show()\n",
+        "\n",
+        "# Mostramos los resultados gráficamente\n",
+        "plt.figure(figsize=(10, 6))\n",
+        "plt.scatter(accuracies[:, 0] * accuracies[:, 1], accuracies[:, 4], c=accuracies[:, 3], cmap='viridis')\n",
+        "plt.xlabel('Número de Neuronas (Total)')\n",
+        "plt.ylabel('Accuracy')\n",
+        "plt.title('Influencia de los Hiperparámetros en MLP (Neuronas vs Iteraciones)')\n",
+        "plt.colorbar(label='#Iteraciones')\n",
+        "plt.show()\n"
+      ],
+      "metadata": {
+        "id": "RdmW3tKY79QT"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### 3.3 Características de las Redes Neuronales Artificiales\n",
+        "\n",
+        "Las ANNs tienen sus propias ventajas y desventajas que las hacen adecuadas para diferentes situaciones en biología y otras disciplinas. A continuación, se exponen una serie de propiedades de interés, distinguiendo entre potencialmente positivas y negativas.\n",
+        "\n",
+        "#### 3.3.1 Ventajas de las ANNs\n",
+        "\n",
+        "1. **Capacidad para Aprender Modelos No Lineales:** Una de las ventajas clave de las RNA es su habilidad para aprender y modelar relaciones no lineales en los datos. Esto las hace efectivas para tareas de clasificación en las que las fronteras de decisión son complejas o irregulares.\n",
+        "\n",
+        "2. **Flexibilidad en Tareas de Clasificación y Regresión:** Las ANN pueden aplicarse a una variedad de tareas, desde la clasificación de especies de plantas hasta la predicción de tasas de crecimiento. Son versátiles y pueden adaptarse a diferentes tipos de problemas.\n",
+        "\n",
+        "3. **Capacidad para Extraer Características Relevantes:** Las redes neuronales pueden aprender características útiles directamente de los datos, lo que reduce la necesidad de realizar una extracción manual de características.\n",
+        "\n",
+        "4. **Lidiar con Datos Ruidosos:** Las redes neuronales son robustas y pueden manejar datos ruidosos o con errores, lo que es común en aplicaciones del mundo real.\n",
+        "\n",
+        "5. **Aplicación en Diversos Dominios y Problemas Multimodales:** Las redes neuronales se han utilizado con éxito en una amplia variedad de dominios, desde reconocimiento de voz y visión por computadora hasta biología y finanzas. Además, para problemas que involucran múltiples modos de entrada (por ejemplo, imágenes y texto), las redes neuronales pueden fusionar y modelar estas modalidades de manera efectiva.\n",
+        "\n",
+        "6. **Adaptación en Tiempo Real:** Las redes neuronales pueden aprender y ajustarse continuamente a medida que llegan nuevos datos. Esto las hace adecuadas para aplicaciones en las que los patrones cambian con el tiempo (aprendizaje continuo).\n",
+        "\n",
+        "#### 3.3.2 Desventajas de las ANNs\n",
+        "\n",
+        "1. **Función de Pérdida No Convexa:** Las ANN con capas ocultas tienen una función de pérdida que no es convexa. Esto, en sentido matemático, significa que existen varios mínimos locales en esta función. Como resultado, diferentes inicializaciones aleatorias de pesos pueden llevar a diferentes niveles de precisión en la validación. De ahí que encontremos un comportamiento relativamente inestable y muy dependiente de la selección de la semilla de inicio.\n",
+        "\n",
+        "2. **Ajuste de Hiperparámetros Necesario:** Para obtener buenos resultados con ANN, es necesario ajustar varios hiperparámetros, como el número de neuronas en capas ocultas y el número de iteraciones. Encontrar la configuración óptima puede requerir una búsqueda exhaustiva, lo que se denomina hiperparametrización.\n",
+        "\n",
+        "3. **Sensibilidad a la Escala de Características:** Las ANN son sensibles a la escala de las características. Por lo tanto, se recomienda encarecidamente escalar los datos antes de usar una ANN. La escala adecuada puede variar según el conjunto de datos y debe aplicarse tanto al entrenamiento como a los datos de prueba para obtener resultados precisos. Cualquier técnica de escalado (`Min-Max` o `StandardScaler`) puede ser útil en este caso.\n",
+        "\n",
+        "4. **Problemas con Datos No Numéricos:** Al igual que otros modelos de Machine Learning, las ANN no están diseñadas para manejar directamente características no numéricas, como nombres o etiquetas (categóricos). Estas características generalmente requieren transformación antes de usar una ANN (por ejemplo mediante codificación `One-Hot`).\n",
+        "\n",
+        "5. **Requiere Tamaño de Muestra Grande:** Aunque las ANN son capaces de aprender patrones complejos, su desempeño mejora con un gran conjunto de datos. En casos con conjuntos de datos muy pequeños, pueden no ser la mejor opción.\n",
+        "\n",
+        "6. **Potencialmente Lento en Grandes Conjuntos de Datos:** En comparación con otros algoritmos, las ANN pueden ser relativamente lentas en conjuntos de datos muy grandes, especialmente cuando se incrementa el número de iteraciones necesario para asegurar una convergencia adecuada (con una baja tasa de aprendizaje)."
+      ],
+      "metadata": {
+        "id": "YPoK09S__hYu"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### 3.4 El Vínculo Entre Redes Neuronales y Deep Learning**\n",
+        "\n",
+        "El estudio de las ANN y, en particular, de los MLP, sirve como una base sólida para comprender el paradigma más amplio del DL. Aunque existen diferencias específicas entre estos dos enfoques, el conocimiento adquirido en los primeros es altamente extensible al segundo, con algunas consideraciones importantes.\n",
+        "\n",
+        "**1. Jerarquía de Capas:** Tanto las ANN como el DL se basan en la idea de organizar capas de neuronas o nodos para procesar datos. En las ANN, esto a menudo se limita a una o dos capas ocultas, mientras que en el DL, se emplean múltiples capas ocultas.\n",
+        "\n",
+        "**2. Representación Jerárquica:** El aprendizaje jerárquico de características es un concepto fundamental en DL. A medida que avanzamos en capas más profundas de una red, se espera que las características aprendidas sean cada vez más abstractas y representen conceptos de nivel superior.\n",
+        "\n",
+        "**3. Funciones de Activación:** Las funciones de activación, como la sigmoide y ReLU, son elementos comunes tanto en las ANN como en DL.\n",
+        "\n",
+        "**4. Backpropagation:** El algoritmo de retropropagación de errores es la base del entrenamiento en las ANN. En DL, este algoritmo se mantiene, pero a menudo se combina con técnicas más avanzadas, como el descenso de gradiente estocástico (SGD) con variantes y ajustes más sofisticados.\n",
+        "\n",
+        "**5. Redes Convolucionales (CNN) y Redes Recurrentes (RNN):** En el DL, se extiende el concepto de redes neuronales más allá de las capas completamente conectadas. Las CNN se utilizan para datos con estructura espacial, como imágenes, mientras que las RNN se emplean para datos secuenciales, como texto y series temporales.\n",
+        "\n",
+        "**6. Problemas de Gran Escala:** Las ANN y MLP son efectivas en una variedad de aplicaciones, pero el DL ha demostrado ser especialmente exitoso en problemas de gran escala, como el reconocimiento de imágenes, el procesamiento de lenguaje natural y el aprendizaje por refuerzo."
+      ],
+      "metadata": {
+        "id": "TVcqy4OYGX5S"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ehZHExvcnild"
+      },
+      "source": [
+        "## **4. ENSEMBLES Y RANDOM FOREST**\n",
+        "\n",
+        "Los algoritmos posiblemente más utilizados en Ciencia de Datos son aquéllos basados en múltiples clasificadores, generalmente conocidos como \"ensembles\".\n",
+        "\n",
+        "En esta sección, se introduce en qué consiste esta tipología de sistemas de aprendizaje. Posteriormente, el foco se centra en uno de las aproximaciones más conocidas de este tipo de métodos: el algoritmo Random Forest. Por último, se indican algunas de las ventajas e inconvenientes relativos a este paradigma.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "eRYxY8SgcOb7"
+      },
+      "source": [
+        "### **4.1 Introducción al paradigma de ensembles**\n",
+        "\n",
+        "Hasta el momento, se ha construido un modelo único a partir de los datos del problema, y éste ha permitido realizar una predicción más o menos acertada con respecto al conjunto de test. No obstante, en la actividad cotidiana es frecuente contar con el criterio de distintas fuentes a la hora de tomar decisiones. Agregar o combinar las \"opiniones\" de un grupo de expertos parece ser la clave para incrementar la confianza en una predicción concreta.\n",
+        "\n",
+        "Para que el anterior escenario sea realmente válido, existen dos premisas muy importantes:\n",
+        "\n",
+        "- Las decisiones/predicciones deben ser realizadas a partir de fuentes o expertos que tengan cierta credibilidad. De esta forma, se garantiza una calidad adecuada en la respuesta.\n",
+        "- El grupo de expertos o colección de fuentes debería ser diversa entre sí. Así, se promueve cierto nivel de objetividad.\n",
+        "\n",
+        "En definitiva, en caso de poder contar con  la opinión de especialistas que presenten puntos de vista complementarios, ayudará a aumentar la calidad y fiabilidad de la decisión tomada.\n",
+        "\n",
+        "Esta premisa también tiene su aplicación directa en el Machine Learning, tomando la denominación de \"*modelos tipo Ensemble*\". En esta familia de algoritmos, se construye un número relativamente grande de clasificadores, utilizando para ello dos enfoques:\n",
+        "\n",
+        "- **Bagging**: Usar un subconjunto diferente de los datos de entrenamiento. En este caso, se entrenan `M` clasificadores de manera independiente.\n",
+        "- **Boosting**: Usar pesos o costes para los ejemplos más difíciles de identificar correctamente. En este caso, se realizan `M` iteraciones, en cada una generando un clasificador dependiente del resultado de la etapa anterior.\n",
+        "\n",
+        "Este apartado del curso se centra exclusivamente en la primera de las estrategias, es decir, **bagging**."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "afzl9Aws_Cfd"
+      },
+      "source": [
+        "### **4.2 Random Forest: Fundamentos e implementación en Python**\n",
+        "\n",
+        "Para comprender correctamente en qué se fundamenta el algoritmo Random Forest, hay que definir con detalle la metodología de **bagging**. Si se tiene un conjunto de datos $X$ de tamaño $N$, se podría  generar un nuevo conjunto tomando $N$ instancias de manera aleatoria, con **reemplazamiento**. Si este procedimiento se repite $M$ veces, se obtiene un número suficiente de conjuntos para que su \"combinación\" represente la distribución original de los datos.\n",
+        "\n",
+        "En el caso de la tarea de aprendizaje supervisado, se crearán $M$ nuevos conjuntos de entrenamiento, todos del tamaño original, pero con algunas de las instancias repetidas en cada nuevo conjunto. De este modo, se pueden aprender $M$ clasificadores independientes, cada uno especializado en las instancias que usadas en su entrenamiento.\n",
+        "\n",
+        "Al ser cada modelo relativamente independiente entre sí, y generando cada uno un valor de salida que puede diferir, la pregunta principal que surge en este momento es ¿cómo se unifica la respuesta del modelo global? En el caso de *clasificación* la más común es utilizar un voto por mayoría.\n",
+        "\n",
+        "*Random Forest* es un algoritmo de aprendizaje utilizado indistintamente para clasificación o regresión, y que se basa en el anterior principio de **bagging**. En este caso, el nombre *forest* (bosque en inglés) permite deducir cuál es la familia de modelos que se entrenan en cada submuestra del conjunto de entrenamiento: los **árboles de decisión**.\n",
+        "\n",
+        "Pero este algoritmo añade una nueva componente a la metodología **bagging**, y es la de realizar también una selección de variables de entrada en cada subconjunto de entrenamiento. De esta forma, se obtiene una doble ganancia. Por un lado, se incrementan las diferencias entre cada conjunto, y por tanto entre cada modelo generado. Por otro, el tiempo de aprendizaje y la complejidad de cada modelo se ve reducida.\n",
+        "\n",
+        "![Ejemplo de funcionamiento de Random Forest](https://i.imgur.com/QhZMpbv.png)\n",
+        "\n",
+        "Retomando las dos características principales a cumplir para la metodología tipo Ensemble, en Random Forest se obtiene lo siguiente:\n",
+        "\n",
+        "- Los clasificadores utilizados se basan en árboles de decisión, y por tanto resultan muy apropiados a la hora de realizar el aprendizaje.\n",
+        "- La selección de instancias, junto con la selección de variables, permite que la construcción de cada árbol individual sea relativamente distinto a la de los demás modelos, donde la unión hace la fuerza.\n",
+        "\n",
+        "Utilizar el algoritmo Random Forest en *Scikit-Learn* es tan sencillo como cualquier otro clasificador, como se muestra el siguiente ejemplo:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "99eEaW0unv3X"
+      },
+      "source": [
+        "from sklearn.ensemble import RandomForestClassifier\n",
+        "\n",
+        "rf = RandomForestClassifier(random_state=42)\n",
+        "rf.fit(X_train, y_train)\n",
+        "\n",
+        "y_pred = rf.predict(X_test)\n",
+        "acc = accuracy_score(y_test,y_pred)\n",
+        "print(\"El porcentaje de acierto obtenido por RF es\",acc*100)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "nHMP02vml8K6"
+      },
+      "source": [
+        "metrics.ConfusionMatrixDisplay.from_estimator(rf, X_test, y_test,cmap='binary')\n",
+        "plt.title(\"Matriz de confusión obtenida para el clasificador RF\")\n",
+        "plt.show()\n",
+        "\n",
+        "print(metrics.classification_report(y_test,y_pred))\n",
+        "\n",
+        "f1 = metrics.f1_score(y_test,y_pred,pos_label=\"immune\")\n",
+        "print(\"La medida F1 para el clasificador %s es %.4f\"%(rf.__class__.__name__,f1))\n",
+        "\n",
+        "y_probs = rf.predict_proba(X_test)\n",
+        "auc = metrics.roc_auc_score(y_test, y_probs[:,1])\n",
+        "print(\"La medida AUC para el clasificador %s es %.4f\"%(rf.__class__.__name__,auc))\n",
+        "metrics.RocCurveDisplay.from_estimator(rf, X_test, y_test)\n",
+        "plt.title(\"Curva ROC obtenida para el clasificador RF\")\n",
+        "plt.show()"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "9hhEZPyJyhIi"
+      },
+      "source": [
+        "La implementación de *Scikit-Learn* de Random Forest tiene una doble ventaja muy interesante.\n",
+        "\n",
+        "1. Por un lado, permite identificar cuáles son las variables de entrada más importantes utilizados para predecir la salida. Para ello, se debe consultar una de las propiedades del modelo creado, ``feature_importances_``, que determina el peso de cada variable, normalizado a suma 1.\n",
+        "\n",
+        "2. Por otro lado, se puede transformar el conjunto de datos de entrada de acuerdo a la información anterior, para de este modo simplificar y mejorar un posterior proceso de aprendizaje. En concreto, el método  ``transform()`` reducirá el dataset dejando sólo las variables seleccionadas.\n",
+        "\n",
+        "A continuación se muestra un ejemplo de cómo llevar a cabo este proceso:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "kUs5qXrONtUU"
+      },
+      "source": [
+        "#Para realizar selección de características, usamos lo siguiente:\n",
+        "from sklearn.feature_selection import SelectFromModel\n",
+        "\n",
+        "#En primer lugar, se capturan los valores del ranking de importancia\n",
+        "importancia = rf.feature_importances_\n",
+        "#Se representan las 5 más importantes\n",
+        "(pd.Series(importancia, index=X_train.columns).nlargest(5).plot(kind='barh'))\n",
+        "plt.show()\n",
+        "\n",
+        "#A continuación, se transforma el conjunto de entrenamiento y test\n",
+        "#Para ello, se utilizarán únicamente las variables más importantes según RF\n",
+        "fs = SelectFromModel(rf,prefit=True)  #instrucción que define las variables\n",
+        "X_train_fs = fs.transform(X_train)    #Transformación del conjunto de train\n",
+        "X_test_fs = fs.transform(X_test)      #Transformación del conjunto de test\n",
+        "\n",
+        "rf_fs = RandomForestClassifier(random_state=42)      #Reentrenamos modelo específico de menos variables\n",
+        "rf_fs.fit(X_train_fs, y_train)\n",
+        "\n",
+        "y_pred = rf_fs.predict(X_test_fs)\n",
+        "acc = accuracy_score(y_test,y_pred)\n",
+        "print()\n",
+        "print(\"El acierto con el modelo simplificado a %d variables es %.4f\"%(X_test_fs.shape[1],acc*100))"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "YiVnINDquWP_"
+      },
+      "source": [
+        "El algoritmo Random Forest presenta tres parámetros principales:\n",
+        "\n",
+        "- `n_estimators`: un valor entero (`int`) que indica el número de árboles de decisión utilizados (por defecto=100).\n",
+        "- `max_depth`: un valor entero (`int`) que establece máxima profundidad de cada árbol. Si no hay ninguna, entonces los nodos se expanden hasta que todas las hojas sean puras o hasta que todas las hojas contengan menos de `min_samples_split` instancias (por defecto=`None`).\n",
+        "- `max_features`: un valor a elegir entre {\"auto\", \"sqrt\", \"log2\"}, o bien un valor entero o real (`int` o `float`). Se refiere al número de variables a considerar cuando se busca la mejor división (por defecto=`\"auto\"`, que equivale a `sqrt` o raiz cuadrada del número de variables).\n",
+        "\n",
+        "En general, la preferencia es tener un alto número de árboles (entre 100 y 500) con una gran profundidad (dejar como `None`), dejando también por defecto el número de variables. Sin embargo, hay que considerar que incrementar los dos primeros parámetros implicará un mayor coste computacional, alargando quizá inncesariamente el tiempo de entrenamiento. Es siempre conveniente validar y ajustar los valores de los parámetros de manera independiente para cada caso de estudio.\n",
+        "\n",
+        "En el siguiente ejemplo, se muestra la frontera de decisión obtenida por Random Forest con los parámetros por defecto determinados por *Scikit-Learn*. Hay que tener en cuenta que en este problema transformado a dos únicas variables, la potencia de Random Forest con respecto a la diversidad se pierde, y la potencia predictiva tenderá a reducirse."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Ml3QYHvdsZcf"
+      },
+      "source": [
+        "#Creamos y entrenamos el clasificador con los datos 2D\n",
+        "clf = RandomForestClassifier(random_state=42)\n",
+        "clf.fit(X_2D_train, y_2D_train)\n",
+        "score = clf.score(X_2D_test,y_2D_test)\n",
+        "\n",
+        "fig = plt.figure(figsize=(12,9))\n",
+        "fig = DecisionBoundaryDisplay.from_estimator(clf, X_2D,\n",
+        "                                              response_method=\"predict\",\n",
+        "                                              alpha=0.5,\n",
+        "                                              cmap=plt.cm.coolwarm)\n",
+        "\n",
+        "fig.ax_.scatter(X_2D[:, 0], X_2D[:, 1],\n",
+        "                 c=y_int, edgecolor=\"k\",\n",
+        "                 cmap=plt.cm.coolwarm)\n",
+        "\n",
+        "plt.show()"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "UI_Sksm-yvRi"
+      },
+      "source": [
+        "En el siguiente trozo de código, puede observarse la estructura de uno de los árboles contenidos dentro de RandomForest:\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "hqee0sHey1eN"
+      },
+      "source": [
+        "#Bibliotecas necesarias para una mejor visualización\n",
+        "from sklearn import tree\n",
+        "from graphviz import Source\n",
+        "\n",
+        "rf_full = RandomForestClassifier()\n",
+        "rf_full.fit(X, y)\n",
+        "dt = rf_full.estimators_[0]\n",
+        "\n",
+        "#se pinta el árbol:\n",
+        "tree_graph = tree.export_graphviz(dt, out_file=None,\n",
+        "                                  feature_names=X.columns,\n",
+        "                                  class_names=pd.unique(y[y.columns[0]]),\n",
+        "                                  filled = True)\n",
+        "graph = Source(tree_graph)\n",
+        "graph"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "hCI66qY8_POM"
+      },
+      "source": [
+        "### **4.3 Características de Random Forest**\n",
+        "\n",
+        "Tal como se indicó al comienzo de esta sección, el algoritmo Random Forest es quizá uno de los más utilizados en tareas de clasificación, tanto por usuarios expertos como por aquéllos que se inician en el análisis de datos. Los principales motivos se asocian a las siguientes características:\n",
+        "\n",
+        "- Robusto frente al *overfitting*, en contraposición con el comportamiento de los árboles de decisión individuales.\n",
+        "- La configuración de sus parámetros es bastante simple e intuitiva, y su habilidad predictiva es buena incluso utilizando los valores por defecto.\n",
+        "- Funciona muy bien cuando el número de variables de entrada del problema es grande y para una gran cantidad de datos.\n",
+        "- Permite realizar una selección de variables de alta calidad.\n",
+        "\n",
+        "Sin embargo, existen algunos aspectos también negativos relativos al método Random Forest a tener en cuenta:\n",
+        "\n",
+        "- El aprendizaje puede ser lento dependiendo de la parametrización, es decir, número de árboles y profundidad.\n",
+        "- En contraposición con los árboles de decisión simples, el modelo global Random Forest no resulta directamente interpretable por el usuario. La razón es evidente, y es que el clasificador global tiene un elevado número de árboles, que habría que revisar individualmente.\n",
+        "- No capta las posibles correlaciones entre las variables de entrada.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Eyf5ow0g1LRo"
+      },
+      "source": [
+        "## **REFERENCIAS BIBLIOGRÁFICAS**\n",
+        "\n",
+        "-\tHan, J., Kamber, M., Pei, J. (2011). Data Mining: Concepts and Techniques. San Francisco, CA, USA: Morgan Kaufmann Publishers. ISBN: 0123814790, 9780123814791\n",
+        "- Scikit-Learn: Supervised Learning https://scikit-learn.org/stable/supervised_learning.html (visitado el 25 de Junio de 2020).\n",
+        "- Open Machine Learning Course: Topic 5. Ensembles of algorithms and random forest. Part 1. Bagging https://mlcourse.ai/articles/topic5-part1-bagging/ (visitado el 25 de Junio de 2020).\n",
+        "- Open Machine Learning Course: Topic 5. Ensembles of algorithms and random forest. Part 2. Random Forest https://mlcourse.ai/articles/topic5-part2-rf/ (visitado el 25 de Junio de 2020).\n",
+        "- Open Machine Learning Course: Topic 5. Ensembles of algorithms and random forest. Part 3. Feature Importances https://mlcourse.ai/articles/topic5-part3-feature-importance/ (visitado el 25 de Junio de 2020).\n",
+        "\n",
+        "### **Referencias adicionales**\n",
+        "\n",
+        "-\tAlpaydin, E. (2016). Machine Learning: The New AI. MIT Press. ISBN: 9780262529518\n",
+        "-\tWitten, I. H., Frank, E., Hall, M. A., Pal, C. J. (2017). Data mining: practical machine learning tools and techniques. Amsterdam; London: Morgan Kaufmann. ISBN: 9780128042915 0128042915\n",
+        "- Towards Data Science: Support Vector Machines(SVM) — An Overview https://towardsdatascience.com/https-medium-com-pupalerushikesh-svm-f4b42800e989 (visitado el 25 de Junio de 2020).\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ZCoeT081CESG"
+      },
+      "source": [
+        "<div class=\"alert alert-block alert-success\">\n",
+        "\n",
+        "MOOC Machine Learning y Big Data para la Bioinformática (4ª edición)   \n",
+        "\n",
+        "http://abierta.ugr.es     \n",
+        "\n",
+        "![CC](https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-nd.png)    \n",
+        "</div>    "
+      ]
+    }
+  ]
+}
