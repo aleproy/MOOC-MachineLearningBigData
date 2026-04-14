@@ -1,0 +1,743 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.7.0"
+    },
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/aleproy/MOOC-MachineLearningBigData/blob/main/Modulo%203.2\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "c3KHPE-KcIDn"
+      },
+      "source": [
+        "![cabecera_slide_abiertaugr_bigdata.jpg](https://i.imgur.com/HXn24wC.jpg)\n",
+        "## **Módulo 3 - Ciencia de Datos y Machine Learning.**\n",
+        "## **3.2 Aprendizaje Supervisado.**\n",
+        "\n",
+        "**Autor**:\n",
+        "\n",
+        "*Por* Prof. Alberto Fernández Hilario\n",
+        "\n",
+        "Profesor Catedrático de Universidad de Granada. Instituto Andaluz Interuniversitario en Data Science and Computational Intelligence (DasCI)\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "d7pzDks4cIDr"
+      },
+      "source": [
+        "## Breves Instrucciones\n",
+        "\n",
+        "### Recordatorio: Introducción a NoteBook\n",
+        "\n",
+        "El cuaderno de *Jupyter* (Python) es un enfoque que combina bloques de texto (como éste) junto con bloques o celdas de código. La gran ventaja de este tipo de celdas, es su interactividad, ya que pueden ser ejecutadas para comprobar los resultados directamente sobre las mismas.\n",
+        "\n",
+        "**Muy importante**: el orden de las instrucciones (bloques de código) es fundamental, por lo que cada celda de este cuaderno debe ser ejecutada secuencialmente. En caso de omitir alguna, puede que el programa lance un error (se mostrará un bloque salida con un mensaje en inglés de color rojo), así que se deberá comenzar desde el principio en caso de duda. Para hacer este paso más sencillo, se puede acceder al menú “Entorno de Ejecución” y pulsar sobre “Ejecutar anteriores”.\n",
+        "\n",
+        "¡Ánimo!\n",
+        "\n",
+        "Haga clic en el botón \"play\" en la parte izquierda de cada celda de código. Las líneas que comienzan con un hashtag (#) son comentarios y no afectan a la ejecución del programa.\n",
+        "\n",
+        "También puede pinchar sobre cada celda y hacer \"*ctrl+enter*\" (*cmd+enter* en Mac).\n",
+        "\n",
+        "Cuando se ejecute el primero de los bloques, aparecerá el siguiente mensaje:\n",
+        "\n",
+        "\"*Advertencia: Este cuaderno no lo ha creado Google.*\n",
+        "\n",
+        "*El creador de este cuaderno es \\<autor\\>@go.ugr.es. Puede que solicite acceso a tus datos almacenados en Google o que lea datos y credenciales de otras sesiones. Revisa el código fuente antes de ejecutar este cuaderno. Si tienes alguna pregunta, ponte en contacto con el creador de este cuaderno enviando un correo electrónico a \\<autor\\>@go.ugr.es.”*\n",
+        "\n",
+        "No se preocupe, deberá confiar en el contenido del cuaderno (Notebook) y pulsar en \"*Ejecutar de todos modos*\". Todo el código se ejecuta en un servidor de cálculo externo y no afectará en absoluto a su equipo informático. No se pedirá ningún tipo de información o credencial, y por tanto podrá seguir con el curso de forma segura.\n",
+        "\n",
+        "Cada vez que ejecute un bloque, verá la salida justo debajo del mismo. La información suele ser siempre la relativa a la última instrucción, junto con todos los `print()` (orden para imprimir) que haya en el código."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "fvSfSqqUbPPG"
+      },
+      "source": [
+        "## **ÍNDICE**\n",
+        "\n",
+        "En este *notebook*:\n",
+        "1. Se retomará el concepto de Aprendizaje Supervisado y sus fundamentos.\n",
+        "2. Se realizará una discusión sobre cuáles son las características principales que influyen en dicho aprendizaje.\n",
+        "3. Se introducirá el concepto de Inteligencia Artificial confiable y su influencia en las decisiones a tomar en la recolección de datos, adaptación de los modelos, y auditoría de los resultados.\n",
+        "4. Se explicará la importancia de la validación de los modelos de aprendizaje.\n",
+        "5. Se presentarán distintas alternativas de validación.\n",
+        "    \n",
+        "Contenidos:\n",
+        "1. [¿Qué es el aprendizaje supervisado?](#sec:aprendizaje)   \n",
+        "2. [Características de los datos que influyen en el aprendizaje](#sec:caracteristicas)   \n",
+        "3. [Inteligencia Artificial Confiable: Garantizando Ética en los Modelos](#sec:tai)\n",
+        "4. [Caso de estudio complementario: Aprendizaje de cáncer de mama mediante imágenes](#sec:dataset)  \n",
+        "5. [Necesidad de validar los modelos de Machine Learning](#sec:val)\n",
+        "6. [Bibliografía](#sec:biblio)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "dUBS74q5vTZ_"
+      },
+      "source": [
+        "## **1. ¿QUÉ ES EL APRENDIZAJE SUPERVISADO?<a id=\"sec:aprendizaje\"></a>**\n",
+        "\n",
+        "En módulos anteriores del curso, se han destacado algunos ejemplos de interés sobre el uso de Machine Learning en el campo de la bioinformática. En concreto, dentro de la Cápsula 2 del Módulo 1 (*La Bioinformática. Aplicaciones en Bio-Ciencias y Bio-Salud*), se enumeraron el desarrollo y descubrimiento de fármacos, la microbiología, minería de textos biomédicos, medicina de precisión o personalizada, entre otros. Siendo más específicos, un uso directo del Machine Learning en estos campos sería como herramienta de diagnóstico, para determinar la categoría a la que pertenece un paciente (sano o enfermo). Otra opción válida sería ajustar el nivel de dosis concreto de un medicamento, en este caso calculando un valor numérico.\n",
+        "\n",
+        "En los dos ejemplos anteriores, el objetivo es realizar una predicción del valor de una variable de salida, como el tipo de paciente, o la dosis del medicamento. Cuando el ser humano realiza esta tarea, la realiza en base a su conocimiento basado en la experiencia con otros casos similares (pacientes y medicamentos). En el caso de Machine Learning, esta experiencia se recopila a partir de instancias en un conjunto de datos, como ya se indicó en la primera cápsula de este Módulo.\n",
+        "\n",
+        "Tanto el diagnóstico de pacientes, como la estimación de la dosis de un medicamento, se encuentran dentro de lo que se denomina como “*Aprendizaje supervisado*”. De acuerdo al tipo de variable de salida del problema, las dos tareas fundamentales dentro del aprendizaje supervisado son la **clasificación** y la **regresión**.\n",
+        "\n",
+        "Se denomina clasificación cuando el objetivo es determinar la categoría de una instancia dentro de un grupo de valores fijos (el diagnóstico de pacientes). Por su parte, la regresión busca, a grandes rasgos, crear una función matemática de interpolación para una variable de tipo real (la estimación de dosis del medicamento).\n",
+        "\n",
+        "<table><tr><td>\n",
+        "<img src=\"https://i.imgur.com/w0ey1JO.png\" width=\"300\" alt=\"Ejemplo de la tarea de clasificación\"></td>\n",
+        "<td>\n",
+        "<img src=\"https://i.imgur.com/JZJY6tu.png\" width=\"300\" alt=\"Ejemplo de la tarea de regresión\"></td>\n",
+        "</tr></table>\n",
+        "\n",
+        "\n",
+        "En ambos casos, se utilizarán las variables de entrada que definen el problema o caso de estudio. En concreto, los algoritmos de Machine Learning suelen buscar correlaciones altas entre las variables de entrada y las de salida para así construir un modelo de buena calidad.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "mnkh4NuJQayR"
+      },
+      "source": [
+        "## **2. CARACTERÍSTICAS DE LOS DATOS QUE INFLUYEN EN EL APRENDIZAJE<a id=\"sec:caracteristicas\"></a>**\n",
+        "\n",
+        "Dentro de las tareas de aprendizaje supervisado, es decir, clasificación y regresión, el algoritmo de aprendizaje busca ajustarse lo mejor posible a los datos durante el entrenamiento. Para ello, se utilizan las variables de entrada que describen a cada instancia del problema.\n",
+        "\n",
+        "En este sentido, un tema importante a discutir es si resulta posible determinar la cantidad de datos que es óptima para realizar un correcto aprendizaje, así como la relación entre el número de instancias y el número de variables que las representan. Otra cuestión muy relevante es comprender los detalles asociados a las variables de entrada en sí mismas. Por último, se debe poner énfasis en la necesidad de datos de calidad y el sesgo en los mismos.\n",
+        "\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "OU738ccjBd_B"
+      },
+      "source": [
+        "### **2.1 Discusión respecto al número de instancias<a id=\"subsec:inst\"></a>**\n",
+        "\n",
+        "Con respecto al volumen de información necesario para la tarea de aprendizaje supervisado, no existe una respuesta general que sea válida para todos los casos de estudio o problemas.\n",
+        "\n",
+        "Desde el punto de vista estadístico, la muestra (el conjunto de datos) será más representativa cuanto mayor sea su número. De este modo, a mayor volumen de información disponible, más casos diferentes se es capaz de cubrir, y mejor se adaptará el modelo al caso de estudio real.\n",
+        "\n",
+        "Sí que es posible extraer conocimiento a partir de unos pocos datos, 50 ó 100 por dar un número aproximado. Sin embargo, existe una alta probabilidad que el modelo generado sea demasiado específico, y por tanto no sea útil para su posterior aplicación. El número correcto dependerá de la dificultad del problema a resolver, si bien una regla genérica es que el número de instancias necesario para un correcto aprendizaje debe ser al menos 10 veces el número de parámetros utilizados para configurar el algoritmo.\n",
+        "\n",
+        "Finalmente, esta la cuestión sobre si existe una ratio específica entre el número de instancias y variables que sea apropiada para realizar un aprendizaje correcto. Desafortunadamente, tampoco hay una respuesta exacta, si bien se puede reutilizar la regla genérica anterior para indicar que, en este caso, el número de instancias debe ser al menos 10 veces el número de variables de entrada utilizadas.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "q5t-3Qh6BgNL"
+      },
+      "source": [
+        "### **2.2 Discusión sobre las variables de entrada<a id=\"subsec:vars\"></a>**\n",
+        "\n",
+        "Tal como se indicó anteriormente, los algoritmos de aprendizaje automático suelen buscar correlaciones altas entre las variables de entrada y las de salida.\n",
+        "\n",
+        "La mayor parte de algoritmos de Machine Learning tienen cierta preferencia sobre las variables de entrada de tipo numérico (valores reales como el nivel de expresión genética, o el ph de un producto), si bien se pueden utilizar también variables de tipo nominal (categorías como color  o género).\n",
+        "\n",
+        "Lo único importante en este caso es tener cuidado con incluir variables que puedan desvirtuar el conocimiento que se desea extraer. Por ejemplo, podría existir una relación fuerte entre la edad de una persona y el tiempo de supervivencia a una enfermedad concreta, pero nuestro objetivo es que esa asociación la encontremos directamente en los valores genéticos. Este tipo de variables se conocen como \"**confounding**\" y causan asociaciones de tipo espúreas que deben ser identificadas y evitadas a toda costa, especialmente cuando se trabaja en el área de la bioinformática.\n",
+        "\n",
+        "Otro tema relevante con respecto a las variables se define como \"la maldición de dimensionalidad\". El término dimensionalidad se refiere la cardinalidad (número de elementos) del conjunto de variables. En los problemas de tipo bioinformático, el número de variables utilizadas para el estudio suele ser de miles o incluso decenas de miles. Este hecho dificulta muchísimo la tarea de aprendizaje, ya que se disminuye la capacidad del algoritmo de encontrar una correlación óptima entre las entradas y la salida.\n",
+        "\n",
+        "Por este motivo, resulta imprescindible dedicar un esfuerzo considerable en la fase de preparación de los datos, seleccionando exclusivamente aquellas variables que sean más importantes para el estudio. En efecto, se suele comprobar que un modelo construido sobre un subconjunto de variables predictivas de calidad siempre es mejor que aquél generado utilizando todas las variables originales.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## **3. INTELIGENCIA ARTIFICIAL CONFIABLE: GARANTIZANDO ÉTICA EN LOS MODELOS<a id=\"sec:tai\"></a>**\n",
+        "\n",
+        "En un mundo impulsado por la Inteligencia Artificial (IA) y la Ciencia de Datos, la confiabilidad y ética son fundamentales. Recuerda que cuando hablamos de IA nos estamos refiriendo a los sistemas que utilizan Machine Learning, pues actualmente ambos términos están íntimamente conectados.\n",
+        "\n",
+        "En esta sección, exploraremos la creciente importancia de garantizar la transparencia, equidad y seguridad en el uso de la IA, especialmente en contextos biológicos.\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "DFRKkvJu8tKD"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### **3.1 Inteligencia Artificial Explicable y Transparencia de los Modelos<a id=\"subsec:xai\"></a>**\n",
+        "Garantizar que los sistemas de IA y/o modelos de Machine Learning sean transparentes y sus decisiones sean explicables es esencial. En biología, imagina un modelo que ayuda a diagnosticar enfermedades basado en datos genómicos. Es crucial que los biólogos puedan entender cómo se llega a un diagnóstico. La transparencia de los modelos y su explicabilidad aseguran que las decisiones de la IA sean confiables y éticas.\n",
+        "\n",
+        "Para garantizar lo anterior, algunas de las estrategias más comunes serían las siguientes:\n",
+        "\n",
+        "1. **Interpretabilidad del Modelo**: Esto implica elegir modelos de Machine Learning que sean naturalmente más fáciles de entender. En el Módulo 5, analizaremos cuáles son las propiedades que determinan cuándo un modelo tiende a ser más interpretable, lo cual es especialmente debido a la posibilidad de trazar su lógica de toma de decisiones.\n",
+        "\n",
+        "2. **Visualización de Datos y Modelos**: Las representaciones visuales pueden ayudar a los usuarios a comprender mejor cómo funciona un modelo. Gráficos, diagramas y representaciones visuales de datos y resultados modelados pueden hacer que la información sea más accesible.\n",
+        "\n",
+        "3. **Técnicas de Explicabilidad**: Se han desarrollado métodos específicos para explicar modelos más complejos, es decir, aquellos que no son interpretables per se. Uno de los enfoques es el uso de gráficos de importancia de características, que muestran qué variables son más influyentes en las predicciones del modelo.\n",
+        "\n",
+        "4. **Documentación y Metadatos**: Mantener registros detallados y documentación de modelos y datos es esencial para la transparencia. Esto incluye información sobre cómo se recopilaron los datos, cómo se entrenó el modelo y cómo se tomaron las decisiones."
+      ],
+      "metadata": {
+        "id": "BMSmLkSa856L"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### **3.2 Abordando el Sesgo y la Equidad (fairness) en los Datos<a id=\"subsec:???\"></a>**\n",
+        "\n",
+        "En el emocionante mundo de la Ciencia de Datos, existe una preocupación importante que va más allá de las matemáticas y las técnicas de modelado: el sesgo. El sesgo en los datos puede llevar a resultados injustos, inequitativos y éticamente problemáticos. En este contexto, el sesgo se refiere a la presencia de prejuicios en los datos que pueden afectar negativamente a ciertos grupos o resultados. Por ejemplo, si un modelo de Machine Learning utilizado en conservación de la biodiversidad se entrena principalmente con datos de una región geográfica, puede ignorar problemas en otras áreas.  \n",
+        "\n",
+        "Una idea fundamental que debemos comprender es que **los algoritmos en sí mismos no son inherentemente sesgados**. En cambio, es el sesgo que reside en los propios datos lo que puede introducir resultados no equitativos. Esto significa que, para crear sistemas de Inteligencia Artificial y Machine Learning justos y éticos, debemos prestar atención tanto al proceso de recopilación y preparación de datos como al diseño y entrenamiento de nuestros modelos.\n",
+        "\n",
+        "Un aspecto clave en la comprensión del sesgo de datos es la noción de **variables protegidas**, que son características de los datos, como género, raza o edad, que están sujetas a posibles discriminaciones. Identificar estas variables protegidas es crucial para evaluar posibles fuentes de sesgo.\n",
+        "\n",
+        "Un enfoque común es evaluar el sesgo es en función de grupos identificados por las anteriores variables protegidas. Así, en la actualidad es bastante común realizar una auditoría de modelos para examinar a fondo su comportamiento un modelo en relación con las denominadas como “métricas de sesgo”.\n",
+        "\n",
+        "Imaginemos que estamos desarrollando un modelo de Machine Learning para predecir el riesgo de una persona de desarrollar una enfermedad cardíaca en función de sus datos genéticos y su historial de salud. En este contexto, dos variables clave podrían estar relacionadas con el sesgo: el género y la edad de los pacientes. El género es una variable binaria (hombre o mujer), y la edad se puede agrupar en diferentes categorías (por ejemplo, jóvenes, adultos y mayores). En este caso, podríamos centrarnos en la denominada como métrica de disparidad en la tasa de predicciones positivas, que se refiere a cuántos pacientes de cada grupo (género y edad) son etiquetados como \"en riesgo\" por el modelo. Por ejemplo, podríamos calcular la tasa de predicciones positivas para hombres y mujeres por separado y para cada grupo de edad. Si observamos diferencias significativas en estas tasas, podríamos estar frente a un sesgo en el modelo."
+      ],
+      "metadata": {
+        "id": "P5IxTU799EEL"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ta6942ZVBimE"
+      },
+      "source": [
+        "### **3.3 Seguridad, Robustez y Cumplimiento de la Normativa en la Inteligencia Artificial<a id=\"subsec:data\"></a>**\n",
+        "\n",
+        "En el ámbito de la Ciencia de Datos, es esencial comprender y aplicar conceptos relacionados con la seguridad, la robustez y la regulación en los algoritmos de Machine Learning. Estos conceptos se vuelven críticos para garantizar que los avances tecnológicos no solo sean efectivos, sino también seguros y éticos.\n",
+        "\n",
+        "1. **Robustez de Algoritmos:** La robustez se refiere a la capacidad de un algoritmo de Machine Learning para mantener su rendimiento incluso en situaciones inusuales o cuando se enfrenta a datos ruidosos. En biología, esto se traduce en la capacidad de los modelos para analizar datos genéticos en los que pueden haber errores de secuenciación o variabilidad inesperada.\n",
+        "\n",
+        "2. **Seguridad en Datos Biológicos:** Dada la sensibilidad de los datos biológicos, es fundamental garantizar su seguridad. Esto implica proteger la privacidad de los pacientes y asegurarse de que los datos genéticos o médicos no se utilicen de manera inapropiada. Por ejemplo, al compartir datos de pacientes para investigaciones, es crucial garantizar la anonimización y la protección de datos personales. Actualmente, el denominado como **Aprendizaje Federado** es un paradigma que permite entrenar modelos sin necesidad de compartir datos sensibles de diferentes fuentes.\n",
+        "\n",
+        "3. **AI Act y Regulaciones:** El [AI Act](https://artificialintelligenceact.eu/the-act/) es un reglamento importante de la Unión Europea que busca regular la IA para garantizar su uso ético y seguro. Esto significa que cualquier investigador o desarrollador debe cumplir con regulaciones específicas para garantizar la seguridad y la ética en proyectos que contengan un apartado de IA. En concreto, se definen límites en el desarrollo de aplicaciones en función de su riesgo hacia las personas. No todos los proyectos de IA en biología presentan el mismo nivel de riesgo. Algunos, como el diagnóstico médico, pueden tener un alto impacto en la salud de las personas. Otros, como la identificación de patrones en secuencias genéticas, pueden tener un riesgo moderado. Entender y categorizar estos niveles de riesgo es crucial para aplicar la IA de manera responsable.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "okXC5tztcIDs"
+      },
+      "source": [
+        "## **4. CASO DE ESTUDIO COMPLEMENTARIO: APRENDIZAJE DE CÁNCER DE MAMA MEDIANTE IMÁGENES<a id=\"sec:dataset\"></a>**\n",
+        "\n",
+        "A lo largo de este curso, se trabajará sobre un problema de aprendizaje relativo al **melanoma cutáneo**. Sin embargo, en este apartado en concreto, por cuestión de simplicidad, vamos a realizar algunas pruebas iniciales utilizando como base un conjunto de datos relativamente sencillo, conocido como *breast cancer.*\n",
+        "\n",
+        "Las variables de entrada de este conjunto se calcularon a partir de una imagen digitalizada de un aspirado de aguja fina (FNA) de una masa mamaria. Describen las características de los núcleos celulares presentes en la imagen en un espacio tridimensional.\n",
+        "\n",
+        "Es un conjunto de datos pequeño y muy conocido en la literatura, así como disponible en muchos de las herramientas de Machine Learning, como *Scikit-Learn*.\n",
+        "\n",
+        "Para utilizar este conjunto de datos, se procede a mostrar el código que permite guardar los datos en las variables de Python de una manera sencilla. Observe bien la estructura del bloque de código, que será descrita con detalle justo a continuación."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "j8vUhCWwcIDt"
+      },
+      "source": [
+        "import pandas as pd\n",
+        "#Scikit-learn contiene su propio repositorio de datos\n",
+        "from sklearn.datasets import load_breast_cancer\n",
+        "\n",
+        "data = load_breast_cancer()\n",
+        "#guardamos la entrada (características/variables) y salida (clase) en dos variables X e y\n",
+        "X, y = data.data, data.target\n",
+        "#Transformamos las variables a de tipo numpy a tipo DataFrame (por comodidad de uso)\n",
+        "X = pd.DataFrame(X,columns = data.feature_names)\n",
+        "y = pd.DataFrame(y,columns=[\"label\"])\n",
+        "\n",
+        "#Observamos las cinco primeras muestras\n",
+        "X.head()"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "k0EsutyUcIDx"
+      },
+      "source": [
+        "A partir del código anterior, se puede extraer la siguiente información:\n",
+        "- `X` e `y` son dos estructuras de datos tipo `dataframe` (marco de datos) que son almacenadas en tipo `Pandas` (*biblioteca muy usada en Python*). Un `dataframe` se entiende como un vector n-dimensional, resultando en general mucho más cómodo trabajar con este tipo de estructura de datos que con `numpy`.  \n",
+        "- `X` contiene la matriz de datos de entrada e `y` es un vector unidimensional con la etiqueta de cada muestra en `X`. Por simplicidad, en este caso se ha optado por resolver un problema de clasificación (variable de salida de tipo categórica).\n",
+        "- En el aprendizaje de tipo supervisado, `X` e `y` se usarán para construir el modelo de Machine Learning y probarlo.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ikK-ogEkeItc"
+      },
+      "source": [
+        "## **5. NECESIDAD DE VALIDAR LOS MODELOS DE MACHINE LEARNING<a id=\"sec:val\"></a>**\n",
+        "Tal como se indicó anteriormente, el procedimiento de entrenamiento en aprendizaje supervisado busca crear un modelo que se ajuste perfectamente a los datos que se dan como entrada. Para controlar si se realiza bien dicho ajuste, el algoritmo de construcción del modelo utiliza lo que se conoce como \"*métrica de rendimiento*\". Ésta determinará el error que se comete al realizar una predicción sobre las instancias del conjunto de entrenamiento con el modelo que se está generando.\n",
+        "\n",
+        "Una vez concluido el aprendizaje, resulta de vital importancia realizar un proceso de validación del modelo. Esto significa determinar la calidad que mostrará el modelo cuando se ponga en funcionamiento sobre nuevos datos reales. Por este motivo, se utiliza el llamado “conjunto de test”, que deberá contener instancias nuevas que no se hayan utilizado durante la fase de entrenamiento.\n",
+        "\n",
+        "De acuerdo a lo anterior, en aprendizaje supervisado existen de dos fases muy bien diferenciadas que son el **entrenamiento** (*train*) y la **validación** (*test*). Es necesario insistir que se deben utilizar dos conjuntos de datos totalmente independientes puesto que, de utilizar algún ejemplo de test durante el entrenamiento, se estará sobre-estimando la calidad del modelo generado.\n",
+        "\n",
+        "En la siguiente imagen se puede observar cómo se divide el conjunto de datos de entrada en dos grupos distintos, donde cada ejemplo está marcado con un color diferente si está dentro de \"entrenamiento\" (azul) o de \"test\" (naranja).\n",
+        "\n",
+        "<img src=\"https://i.imgur.com/rtHFFae.jpg\" width=\"400\" alt=\"Ejemplo de división de un problema en entrenamiento y test\">"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Pdvnwig5eamc"
+      },
+      "source": [
+        "### **5.1 Casos de estudio en validación<a id=\"subsec:val\"></a>**\n",
+        "\n",
+        "A partir de los resultados de predicción obtenidos en entrenamiento y test, se calcula una métrica de rendimiento en cada conjunto. En este momento, se pueden dar varios escenarios posibles:\n",
+        "- Se obtiene una *alta calidad* de las métricas de rendimiento tanto en entrenamiento como test: el modelo es totalmente efectivo y se ha concluido el proceso.\n",
+        "\n",
+        "<img src=\"https://i.imgur.com/yEOSo8S.jpg\" width=\"400\" alt=\"Ejemplo de buen modelado\">\n",
+        "\n",
+        "- Se obtiene una *alta calidad* para entrenamiento, pero *muy baja* en test: se ha caido en el sobre-aprendizaje (*over-fitting*), es decir, se ha construido un modelo tan específico para los datos de entrenamiento, que luego es incapaz de generalizar bien con datos diferentes (test).\n",
+        "\n",
+        "<img src=\"https://i.imgur.com/yzKYZmm.jpg\" width=\"400\" alt=\"Ejemplo de overfitting\">\n",
+        "\n",
+        "- Se obtiene una *baja calidad* tanto en entrenamiento como en test (*under-fitting*): el modelo no es bueno y se debe actuar mediante preprocesamiento, un ajuste adecuado de parámetros, o sencillamente alimentando al sistema con un mayor número de datos.\n",
+        "\n",
+        "<img src=\"https://i.imgur.com/ObrYTs5.jpg\" width=\"400\" alt=\"Ejemplo de underfitting\">"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "3NZRDZawfRH6"
+      },
+      "source": [
+        "### **5.2 Tipos de técnicas de validación<a id=\"subsec:tecnicas\"></a>**\n",
+        "\n",
+        "Para dividir nuestro conjunto de datos original en los conjuntos de entrenamiento y test, existen tres metodologías diferentes:\n",
+        "\n",
+        "- La más sencilla es la de retención o \"**hold-out**\", donde los datos originales se dividen en dos conjuntos disjuntos complementarios. Por ejemplo, un 60% de instancias iniciales para entrenamiento y el 40% restante para test.\n",
+        "- La más utilizada por su validez estadística es la validación cruzada de *k* particiones o \"**k-fold cross validation**\", donde se divide el conjunto original en *k* partes disjuntas. Por ejemplo, se separan las instancias en 5 grupos sin reemplazamiento.  \n",
+        "- Existe la posibilidad de hacer una experimentación exhaustiva con \"dejar uno fuera\" o \"**leave one out validation (LOOV)**\". En este caso se utiliza todo el conjunto para entrenar, salvo un ejemplo para test.\n",
+        "\n",
+        "En lo sucesivo, se explicarán con más detalle las principales de estas técnicas, poniendo especial atención a la más recomendada de todas: *la validación cruzada de k particiones*. La razón fundamental es que se emplean todas las instancias del conjunto de datos en las diferentes particiones de test, promoviendo un mayor rigor estadístico, y por tanto validez de los resultados obtenidos.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "9IAuZKEvcID-"
+      },
+      "source": [
+        "### **5.3 Validación Hold-out<a id=\"subsec:holdout\"></a>**\n",
+        "\n",
+        "Tal como se introdujo anteriormente, “**hold-out**” crea dos conjuntos simples, es decir, un fichero de entrenamiento y otro de test, mediante una partición en un porcentaje determinado de los datos. El porcentaje seleccionado para cada subconjunto queda a disposición del usuario, si bien valores típicos suelen estar por encima del 60, 75 u 80% para entrenamiento, y el resto para test.\n",
+        "\n",
+        "La ventaja del método “**hold-out**” es que es muy sencillo y eficiente de realizar. Sin embargo, este método no es recomendable puesto que la calidad final del modelo dependerá en gran medida de cómo se hayan dividido los datos. En otras palabras, al separar las instancias de manera totalmente aleatoria podría darse el caso que todas las instancias seleccionadas para test sean las más difíciles de identificar."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "p92PG8elCoj1"
+      },
+      "source": [
+        "Se utilizará por tanto **hold-out** cuando se realicen pruebas iniciales para conocer el comportamiento base de los diferentes modelos (algoritmos de Machine Learning) aplicados al problema bajo estudio.\n",
+        "\n",
+        "A continuación, se va a conocer el código para crear las particiones de datos, donde todas las instrucciones están debidamente comentadas para entender su función concreta. El parámetro principal utilizado en este caso será el `ratio` para definir la división entre el conjunto de *test* y *entrenamiento* respectivamente.\n",
+        "\n",
+        "Se recuerdan inicialmente algunos detalles sobre el código fuente mostrado:\n",
+        "\n",
+        "- Como apoyo en todo el curso se utilizará la biblioteca [Scikit-learn](https://scikit-learn.org/) por lo que se importará toda la funcionalidad y módulos del mismo en las primeras líneas del código\n",
+        "- El particionamiento de datos se realiza por defecto de manera aleatoria. Por este motivo, se debe utilizar lo que se conoce como \"semilla\". Éste es un valor fijo que permite generar siempre los mismos resultados cada vez que se ejecute el código con dicha semilla indicada en el parámetro ```random_state```.\n",
+        "- Siempre se utilizará como última instrucción un ```print()``` para mostrar un resultado que permita interpretar todo el proceso."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "PSP7jrURcID_"
+      },
+      "source": [
+        "#se carga el codigo necesario para hacer \"hold-out\"\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "\n",
+        "#Parámetros usados:\n",
+        "rd = 42 #al ser un proceso no determinista, se fija una semilla\n",
+        "ratio = 0.2  #El parámetro más importante: cuál es el ratio usado para entrenamiento y test\n",
+        "\n",
+        "#A continuación se hace la división. Importante: se divide la entrada y salida (X e y)\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio,random_state=rd)\n",
+        "\n",
+        "#Se imprimen los índices de train y test con respecto al conjunto original\n",
+        "print(\"%s %s\" % (X_train.index, X_test.index))\n"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "vf9xYaTrEs3H"
+      },
+      "source": [
+        "Los siguientes fragmentos de código muestran el tamaño de los conjuntos que se acaban de crear"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "QhOWX0hjErxA"
+      },
+      "source": [
+        "#Primero train (X e y)\n",
+        "X_train.shape, y_train.shape"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "DednOIqmE1p3"
+      },
+      "source": [
+        "#Luego test (x e y)\n",
+        "X_test.shape, y_test.shape"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "xF6roYuMcIED"
+      },
+      "source": [
+        "En los resultaod anteriores se puede observer que, al realizar una división en 80%-20% (se aplicó un ```ratio = 0.2``` para test) se tienen 455 instancias en entrenamiento ($569 \\cdot 0.8$) y 114 para test ($569 \\cdot 0.2$).\n",
+        "\n",
+        "Es extremadamente importante que ambos conjuntos sean disjuntos, es decir, que ningún ejemplo de test se haya visto durante el entrenamiento, para poder realizar correctamente la validación. Este hecho se comprueba en el siguiente bloque de código, donde se \"pregunta\" si algún dato (instancia) del conjunto de entrenamiento (`X_train`) está contenido en el de test (`X_test`). El resultado deberá ser siempre ```False``` para todas las filas."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ipK8t7HxcIED"
+      },
+      "source": [
+        "X_train.isin(X_test) #Instrucción que comprueba si algún elemento de test se repite en train\n",
+        "\n",
+        "#La primera columna que se observa es el índice original, que está desordenado"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "LEZnGhcYjwSR"
+      },
+      "source": [
+        "### **5.4 Validación cruzada de k particiones<a id=\"subsec:kfold\"></a>**\n",
+        "\n",
+        "Esta aproximación es la más utilizada y recomendada cuando se realiza aprendizaje supervisado. El motivo principal es su rigor estadístico, así como el uso de la totalidad del conjunto de datos para entrenamiento y test, utilizando para ello un procedimiento iterativo, es decir, que se repitirá un número determinado de veces.\n",
+        "\n",
+        "En concreto, cuando se utiliza una validación cruzada de k particiones se dividen los datos en k subconjuntos disjuntos, llamadas particiones. El objetivo, como se ha indicado anteriormente, es el de proceder a validar los modelos con diferentes combinaciones de dichas particiones. En concreto, las instancias pertenecientes a cada una de las *k* particiones se almacenerán en un conjunto diferente de test; mientras que la unión de las instancias que se encuentren en las *k-1* particiones restantes, se utilizarán para construir cada uno de los conjuntos de entrenamiento."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "_fC6ZggrcID6"
+      },
+      "source": [
+        "Como ejemplo, si se realiza una validación cruzada con 5 particiones (k=5), los datos se repartirían como se muestra en el esquema de la siguiente figura. Como se puede observar, para cada partición tomamos 1/5 de prueba, y los 4/5 restantes de entrenamiento.\n",
+        "\n",
+        "![Ejemplo de validación cruzada de 5 particiones](https://i.imgur.com/NAgX78H.png)\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "XqqtJjhBHJWC"
+      },
+      "source": [
+        "A continuación, se indica cómo se puede realizar esta división de datos mediante Python, de nuevo aprovechando la funcionalidad de la biblioteca  **Scikit-Learn**.\n",
+        "\n",
+        "La principal diferencia del siguiente código con respecto al utilizado para *hold-out* reside en lo siguiente: en este caso, en lugar de generar directamente dos nuevas variables `train` y `test`, se calculan a priori los índices (posiciones) de las instancias que pertenecen a cada partición de test. Posteriormente, se utilizará una estructura repetitiva (bucle `for`) para generar las particiones realizando una búsqueda por índice (utilizando una función denominada `iloc`) sobre el conjunto original de entrada (`X`) y de salida (```y```).\n",
+        "\n",
+        "La salida del ejemplo de código fuente mostrará, en cada línea, dos listas de índices (entre corchetes [ ]) representando las instancias seleccionadas para entrenamiento y test, respectivamente."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "8ibjERh6cID7"
+      },
+      "source": [
+        "from sklearn.model_selection import KFold #cargamos las funciones necesarias\n",
+        "\n",
+        "#Parámetros\n",
+        "rd = 42\n",
+        "particiones = 5\n",
+        "\n",
+        "#Primera diferencia con hold-out, se crean a priori los índices de las particiones\n",
+        "kf = KFold(n_splits=particiones,shuffle=True,random_state=rd)\n",
+        "\n",
+        "#A continuación se realiza cada subdivisión.\n",
+        "#Notar que es necesario hacerlo iterativo (bucle for) para cada partición\n",
+        "for train, test in kf.split(X,y):\n",
+        "  print(\"%s %s\" % (train, test))\n",
+        "  #Se crean los conjuntos iterativamente (iloc es una función de \"búsqueda\")\n",
+        "  X_train, X_test, y_train, y_test = X.iloc[train], X.iloc[test], y.iloc[train], y.iloc[test]\n"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "3_yAJy3plMw5"
+      },
+      "source": [
+        "Tal como se indicó, la salida que debería mostrarse arriba son los índices de las diferentes instancias en entrenamiento y test. Es importante observar que para test no coinciden los números en ninguno de los 5 casos.\n",
+        "\n",
+        "![Divisón 5 fold cross validation](https://i.picasion.com/pic90/b4ecf165491da3986586d93ec996f8dd.gif)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "XPyCytE-Jb34"
+      },
+      "source": [
+        "Además de lo anterior, es muy común repetir el proceso de particionamiento (división) en k-conjuntos un número determinado de veces para añadir mayor rigor estadístico a los resultados obtenidos. Esto significa que, como en el caso de *hold-out* el objetivo es eliminar la dependencia del proceso de división aleatoria, que puede provocar que las instancias de test más difíciles siempre caigan en el mismo conjunto.\n",
+        "\n",
+        "Este procedimiento descrito en el párrafo anterior se denomina como *repeated k-fold* y se muestra en el siguiente ejemplo de código:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "lykr3RVLJcty"
+      },
+      "source": [
+        "from sklearn.model_selection import RepeatedKFold\n",
+        "\n",
+        "#Parámetros\n",
+        "rd = 42\n",
+        "particiones = 5\n",
+        "repeticiones = 3\n",
+        "\n",
+        "#Muy similar al anterior, pero incluyendo un parámetro adicional de repeticiones\n",
+        "rkf = RepeatedKFold(n_splits=particiones, n_repeats=repeticiones, random_state=rd)\n",
+        "for index, (train, test) in enumerate(rkf.split(X,y)):\n",
+        "  if index % particiones == 0:\n",
+        "    print(\"Repetición \",(index // particiones)+1)\n",
+        "  print(\"%s %s\" % (train, test))\n",
+        "  X_train, X_test, y_train, y_test = X.iloc[train], X.iloc[test], y.iloc[train], y.iloc[test]"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "lGAaTIihJNDg"
+      },
+      "source": [
+        "**Nota importante:** El número total de particiones y / o iteraciones no se puede estimar a priori y dependerá principalmente del número de instancias de que dispongamos. El caso más común es utilizar 10 particiones por defecto y 3 repeticiones. Sin embargo, en caso de pocas instancias se puede bajar a 5 particiones y 3 ó 5 repeticiones."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "PlxfnLs3KP4T"
+      },
+      "source": [
+        "### **5.5 Validación cruzada estratificada (solo clasificación)<a id=\"sfcv\"></a>**\n",
+        "\n",
+        "Esta alternativa es una variación muy adecuada para clasificación del *k-fold* que devuelve particiones de tipo estratificadas. Este término significa que cada conjunto contiene aproximadamente el mismo porcentaje de muestras de cada clase objetivo que el conjunto completo.\n",
+        "\n",
+        "Esto resulta imprescindible para evitar el posible sesgo en los modelos y obtener una conclusiones equívocas. Es especialmente relevante cuando se trabaja con datos no balanceados, es decir, con un porcentaje muy pequeño de muestras de una de las clases.\n",
+        "\n",
+        "Tal como se indicó al comienzo de esta actividad, este caso de estudio se observa con frecuencia en problemas del contexto de biología y/o salud."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Y8p5dvkgLNYV"
+      },
+      "source": [
+        "En el siguiente ejemplo, se implementa la solución utilizando esta nueva versión mejorada de *k-fold*. El formato de llamada es prácticamente equivalente al caso anterior de validación cruzada.\n",
+        "\n",
+        "Para entender las diferencias en su comportamiento, se realiza una comparativa entre ambos esquemas de particionamiento, comprobando la distribución final de ejemplos que hay en cada clase. Para ello se utiliza una instrucción de `numpy` llamada ```bincount``` que simplemente cuenta el número de ocurrencias de cada valor dentro de la lista."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "VVr-n_h_mNXp"
+      },
+      "source": [
+        "from sklearn.model_selection import StratifiedKFold, KFold\n",
+        "import numpy as np\n",
+        "\n",
+        "#Parámetros\n",
+        "rd = 42\n",
+        "particiones = 5\n",
+        "\n",
+        "#Realizamos partición estratificada\n",
+        "skf = StratifiedKFold(n_splits=particiones,shuffle=True,random_state=rd)\n",
+        "\n",
+        "#Vamos a chequear las diferencias con KFold\n",
+        "kf = KFold(n_splits=particiones,shuffle=True,random_state=rd)\n",
+        "\n",
+        "#A continuación hacemos cada subdivisión.\n",
+        "print(\"Comprobar distribución de clases en SKF:\")\n",
+        "for train, test in skf.split(X,y):\n",
+        "  X_train, X_test, y_train, y_test = X.iloc[train], X.iloc[test], y.iloc[train], y.iloc[test]\n",
+        "  print('train -  {}   |   test -  {}'.format(np.bincount(y_train.iloc[:,0]), np.bincount(y_test.iloc[:,0])))\n",
+        "\n",
+        "print(\"\\nComprobar distribución de clases en KF:\")\n",
+        "for train, test in kf.split(X, y):\n",
+        "  X_train, X_test, y_train, y_test = X.iloc[train], X.iloc[test], y.iloc[train], y.iloc[test]\n",
+        "  print('train -  {}   |   test -  {}'.format(np.bincount(y_train.iloc[:,0]), np.bincount(y_test.iloc[:,0])))"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "C60itztYOm0f"
+      },
+      "source": [
+        "En el ejemplo anterior se ha mostrado la distribución de instancias en las dos clases para las particiones de test. A pesar que el conjunto de datos de *breast cancer* no presenta un alto desequilibrio de clases, sí que se ha observado que se puede crear sin quererlo un sesgo hacia alguna de las mismas (por ejemplo en la segunda de las particiones)."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "###5.6 Validación \"Leave One Out\" (LOOV)\n",
+        "\n",
+        "Esta es, junto con la técnica *hold-out*, la más sencilla de las técnicas de validación. En este caso concreto, cada muestra se considera un único conjunto de prueba, mientras que las muestras restantes forman el conjunto de entrenamiento.\n",
+        "\n",
+        "LOOV debe utilizarse con especial cuidado. En concreto, en lugar de construir *k* modelos (como en la validación cruzada k-fold), ahora se obtienen *n* modelos, siendo *n* el tamaño del conjunto de datos. Teniendo en cuenta lo anterior, y dado que cada modelo se aprende a partir del conjunto de datos completo (menos una muestra), el coste computacional de esta validación es simplemente enorme.\n",
+        "\n",
+        "Los usuarios deben tener en cuenta que, en lo que respecta a las métricas de rendimiento, esta técnica de validación ofrece una alta varianza. Este comportamiento es esperable ya que todos los modelos son básicamente iguales (se construyeron con casi las mismas instancias).\n",
+        "\n",
+        "LOOV se puede simular a partir de `KFold(n_splits=n)` con `n` el número total de muestras del conjunto de datos."
+      ],
+      "metadata": {
+        "id": "H-OiZOMM6Vqp"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Parámetros\n",
+        "rd = 42\n",
+        "particiones = len(X)\n",
+        "\n",
+        "#Parámetros rd = 42 particiones = todas las muestras\n",
+        "loov = KFold(n_splits=particiones,shuffle=True,random_state=rd)\n",
+        "\n",
+        "#A continuación hacemos cada subdivisión\n",
+        "for train, test in loov.split(X,y):\n",
+        "  X_train, X_test, y_train, y_test = X.iloc[train], X.iloc[test], y.iloc[train], y.iloc[test]\n",
+        "  #A continuación se debe realizar el aprendizaje y la validación\n",
+        "\n",
+        "print(\"Ejemplo última partición: Total sizeTr[{}] sizeTst[{}]\".format(len(y_train), len(y_test)))"
+      ],
+      "metadata": {
+        "id": "kwagkjqv6UNa"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "gyrYvGtjs7Wn"
+      },
+      "source": [
+        "## **REFERENCIAS BIBLIOGRÁFICAS**\n",
+        "\n",
+        "-\tHan, J., Kamber, M., Pei, J. (2011). Data Mining: Concepts and Techniques. San Francisco, CA, USA: Morgan Kaufmann Publishers. ISBN: 0123814790, 9780123814791\n",
+        "- Hastie, T., Tibshirani, R., Friedman, J. H. (2001). The Elements of Statistical Learning. Springer Verlag.\n",
+        "-\tWitten, I. H., Frank, E., Hall, M. A., Pal, C. J. (2017). Data mining: practical machine learning tools and techniques. Amsterdam; London: Morgan Kaufmann. ISBN: 9780128042915 0128042915\n",
+        "- Molnar, C. (2023). Interpretable Machine Learning A Guide for Making Black Box Models Explainable. https://christophm.github.io/interpretable-ml-book/ (consultado el 26 de octubre de 2023)\n",
+        "- Scikit-Learn: Cross-validation: evaluating estimator performance https://scikit-learn.org/stable/modules/cross_validation.html (visitado el 25 de Junio de 2020)\n",
+        "\n",
+        "### **Referencias adicionales**\n",
+        "\n",
+        "-\tAlpaydin, E. (2016). Machine Learning: The New AI. MIT Press. ISBN: 9780262529518\n",
+        "- James, G., Witten, D., Hastie, T., Tibshirani, R. (2013). An introduction to statistical learning (Vol. 112). Springer.\n",
+        "- Kohavi, R. (1995). A Study of Cross-Validation and Bootstrap for Accuracy Estimation nd Model Selection. Proceedings of the International Joint Conference on Artificial Intelligence IJCAI), 1995 (p./pp. 1137--1145).\n",
+        "- Rao, R. B. & Fung, G. (2008). On the Dangers of Cross-Validation. An Experimental Evaluation. SDM (p./pp. 588-596), : SIAM. ISBN: 978-1-61197-278-8\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "CHgQ2OSQsqCx"
+      },
+      "source": [
+        "<div class=\"alert alert-block alert-success\">\n",
+        "MOOC Machine Learning y Big Data para la Bioinformática (4ª edición)   \n",
+        "\n",
+        "http://abierta.ugr.es\n",
+        "\n",
+        "![CC](https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-nd.png)\n",
+        "</div>    "
+      ]
+    }
+  ]
+}
